@@ -101,8 +101,8 @@ export default async function HomePage() {
               </p>
               <p>
                 By controlling the decay time of each frequency band separately,
-                we create a reverb that is not just a sonic space, but a musical
-                tool.
+                we create a reverb that is not just a sonic space, but a true
+                musical tool.
               </p>
               <p>
                 Special numbers (Golden number, Silver number, Pi and Euler)
