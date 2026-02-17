@@ -12,11 +12,6 @@ const nextConfig = {
       },
     ],
   },
-  experimental: {
-    staleTimes: {
-      dynamic: 60,
-    },
-  },
 };
 
 module.exports = nextConfig;

@@ -2,6 +2,8 @@ import { client } from "@/lib/sanity";
 import { COLLECTIONS_QUERY } from "@/lib/queries";
 import CollectionCard from "@/components/ui/CollectionCard";
 
+export const revalidate = 60;
+
 async function getCollections() {
   return await client.fetch(COLLECTIONS_QUERY);
 }

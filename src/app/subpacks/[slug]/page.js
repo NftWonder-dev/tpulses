@@ -4,6 +4,8 @@ import ProductCard from "@/components/ui/ProductCard";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
+export const revalidate = 60;
+
 async function getSubpack(slug) {
   return await client.fetch(SUBPACK_BY_SLUG_QUERY, { slug });
 }
