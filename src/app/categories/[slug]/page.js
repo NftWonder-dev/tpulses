@@ -4,6 +4,8 @@ import ProductCard from "@/components/ui/ProductCard";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
+export const revalidate = 60; // ⬅️ Add this line
+
 async function getCategory(slug) {
   return await client.fetch(CATEGORY_BY_SLUG_QUERY, { slug });
 }
@@ -35,7 +37,7 @@ export default async function CategoryPage({ params }) {
         <div className="mb-16">
           <div className="flex items-center gap-4 mb-6">
             <h1 className="font-space-grotesk text-6xl font-bold">
-              {category.name}
+              {category.name} Category
             </h1>
           </div>
           {category.description && (

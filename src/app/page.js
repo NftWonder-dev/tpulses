@@ -123,7 +123,7 @@ export default async function HomePage() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="font-space-grotesk text-5xl font-bold mb-4">
-              Algorithms | Sources
+              All Collections
             </h2>
           </div>
 
