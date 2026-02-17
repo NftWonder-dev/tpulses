@@ -1,3 +1,5 @@
+export const revalidate = 60;
+
 export default function TheoryPage() {
   return (
     <div className="min-h-screen pt-32 pb-20">
@@ -24,7 +26,7 @@ export default function TheoryPage() {
               <iframe
                 width="100%"
                 height="100%"
-                src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+                src="https://www.youtube.com/embed/Lx9UfeujiqE"
                 title="Theory Explanation"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
