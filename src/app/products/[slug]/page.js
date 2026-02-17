@@ -1,19 +1,19 @@
-import { client } from '@/lib/sanity'
-import { PRODUCT_BY_SLUG_QUERY } from '@/lib/queries'
-import AddToCartButton from '@/components/AddToCartButton'
-import { urlFor } from '@/lib/sanity'
-import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { client } from "@/lib/sanity";
+import { PRODUCT_BY_SLUG_QUERY } from "@/lib/queries";
+import AddToCartButton from "@/components/AddToCartButton";
+import { urlFor } from "@/lib/sanity";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 async function getProduct(slug) {
-  return await client.fetch(PRODUCT_BY_SLUG_QUERY, { slug })
+  return await client.fetch(PRODUCT_BY_SLUG_QUERY, { slug });
 }
 
 export default async function ProductPage({ params }) {
-  const product = await getProduct(params.slug)
+  const product = await getProduct(params.slug);
 
   if (!product) {
-    return <div>Product not found</div>
+    return <div>Product not found</div>;
   }
 
   return (
@@ -21,11 +21,18 @@ export default async function ProductPage({ params }) {
       <div className="max-w-7xl mx-auto px-6">
         {/* Back Button */}
         <Link
-          href={product.category ? `/categories/${product.category.slug.current}` : (product.collection ? `/collections/${product.collection.slug.current}` : '/collections')}
+          href={
+            product.category
+              ? `/categories/${product.category.slug.current}`
+              : product.collection
+                ? `/collections/${product.collection.slug.current}`
+                : "/collections"
+          }
           className="inline-flex items-center gap-2 text-cyan-400 font-space-mono text-xs uppercase tracking-widest mb-12 hover:gap-3 transition-all"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to {product.category?.name || product.collection?.name || 'Collections'}
+          Back to{" "}
+          {product.category?.name || product.collection?.name || "Collections"}
         </Link>
 
         {/* Product Content */}
@@ -66,8 +73,8 @@ export default async function ProductPage({ params }) {
             </div>
 
             {/* Description - MOVED DOWN */}
-            <p className="text-slate-400 text-lg leading-relaxed max-w-xl mb-8">
-              {product.description || 'No description available.'}
+            <p className="text-slate-400 text-lg leading-relaxed max-w-xl mb-8 text-justify">
+              {product.description || "No description available."}
             </p>
 
             {/* Tags */}
@@ -128,17 +135,20 @@ export default async function ProductPage({ params }) {
               <div className="grid grid-cols-2 gap-4 text-[10px] uppercase font-space-mono">
                 {product.percentage && (
                   <div className="text-slate-500">
-                    Percentage: <span className="text-white">{product.percentage}</span>
+                    Percentage:{" "}
+                    <span className="text-white">{product.percentage}</span>
                   </div>
                 )}
                 {product.fileSize && (
                   <div className="text-slate-500">
-                    File Size: <span className="text-white">{product.fileSize}</span>
+                    File Size:{" "}
+                    <span className="text-white">{product.fileSize}</span>
                   </div>
                 )}
                 {product.fileFormat && (
                   <div className="text-slate-500">
-                    Format: <span className="text-white">{product.fileFormat}</span>
+                    Format:{" "}
+                    <span className="text-white">{product.fileFormat}</span>
                   </div>
                 )}
                 <div className="text-slate-500">
@@ -154,9 +164,10 @@ export default async function ProductPage({ params }) {
             {(product.previewImages?.[0] || product.image) && (
               <div className="rounded-xl border border-white/10 overflow-hidden bg-slate-900">
                 <img
-                  src={product.previewImages?.[0] 
-                    ? urlFor(product.previewImages[0]).width(800).url() 
-                    : product.image
+                  src={
+                    product.previewImages?.[0]
+                      ? urlFor(product.previewImages[0]).width(800).url()
+                      : product.image
                   }
                   alt={product.name}
                   className="w-full h-auto object-contain"
@@ -179,5 +190,5 @@ export default async function ProductPage({ params }) {
         </div>
       </div>
     </div>
-  )
+  );
 }
