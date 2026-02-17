@@ -18,6 +18,7 @@ export default function ProductCard({ product }) {
 
   const { addToCart, cart } = useCart();
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const handleAddToCart = (e) => {
     e.preventDefault();
@@ -30,8 +31,9 @@ export default function ProductCard({ product }) {
       // Show confirmation modal
       setShowConfirm(true);
     } else {
-      // Add directly
+      // Add directly and show success
       addToCart(product);
+      setShowSuccess(true);
     }
   };
 
@@ -40,12 +42,19 @@ export default function ProductCard({ product }) {
     e.stopPropagation();
     addToCart(product);
     setShowConfirm(false);
+    setShowSuccess(true);
   };
 
   const cancelAdd = (e) => {
     e.preventDefault();
     e.stopPropagation();
     setShowConfirm(false);
+  };
+
+  const closeSuccess = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowSuccess(false);
   };
 
   return (
@@ -109,7 +118,7 @@ export default function ProductCard({ product }) {
         </div>
       </Link>
 
-      {/* Confirmation Modal */}
+      {/* Confirmation Modal (Item Already Exists) */}
       {showConfirm && (
         <div 
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
@@ -140,6 +149,39 @@ export default function ProductCard({ product }) {
                 Add Anyway
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Success Modal */}
+      {showSuccess && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          onClick={closeSuccess}
+        >
+          <div 
+            className="bg-deep-bg border border-white/10 rounded-xl p-6 max-w-md w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-center mb-4">
+              <div className="w-16 h-16 bg-cyan-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="font-space-grotesk text-xl font-bold mb-2">
+                Item Added to Cart
+              </h3>
+              <p className="text-slate-400">
+                <span className="text-white font-bold">{name}</span> has been added to your cart.
+              </p>
+            </div>
+            <button
+              onClick={closeSuccess}
+              className="w-full bg-cyan-500 hover:bg-cyan-400 text-black py-3 rounded font-bold uppercase text-sm transition-all"
+            >
+              OK
+            </button>
           </div>
         </div>
       )}
