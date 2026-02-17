@@ -5,8 +5,6 @@ import { urlFor } from "@/lib/sanity";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
-export const revalidate = 60; // ⬅️ Add this line
-
 async function getProduct(slug) {
   return await client.fetch(PRODUCT_BY_SLUG_QUERY, { slug });
 }

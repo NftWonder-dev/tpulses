@@ -1,13 +1,13 @@
-import { client } from '@/lib/sanity'
-import { COLLECTIONS_QUERY } from '@/lib/queries'
-import CollectionCard from '@/components/ui/CollectionCard'
+import { client } from "@/lib/sanity";
+import { COLLECTIONS_QUERY } from "@/lib/queries";
+import CollectionCard from "@/components/ui/CollectionCard";
 
 async function getCollections() {
-  return await client.fetch(COLLECTIONS_QUERY)
+  return await client.fetch(COLLECTIONS_QUERY);
 }
 
 export default async function CollectionsPage() {
-  const collections = await getCollections()
+  const collections = await getCollections();
 
   return (
     <div className="min-h-screen pt-32 pb-20">
@@ -28,5 +28,5 @@ export default async function CollectionsPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

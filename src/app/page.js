@@ -4,8 +4,6 @@ import CollectionCard from "@/components/ui/CollectionCard";
 import { ArrowRight, Cpu, Headphones, Music2 } from "lucide-react";
 import Link from "next/link";
 
-export const revalidate = 60; // ⬅️ Add this line
-
 async function getHomeData() {
   const collections = await client.fetch(COLLECTIONS_QUERY);
   return { collections };
