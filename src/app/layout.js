@@ -2,6 +2,7 @@ import { Space_Grotesk, Space_Mono, Inter } from 'next/font/google'
 import Navigation from '@/components/layout/Navigation'
 import Footer from '@/components/layout/Footer'
 import { CartProvider } from '@/context/CartContext'
+import PasswordProtection from '@/components/PasswordProtection'
 import './globals.css'
 
 const spaceGrotesk = Space_Grotesk({
@@ -30,9 +31,11 @@ export default function RootLayout({ children }) {
     <html lang="en" className={`${spaceGrotesk.variable} ${spaceMono.variable} ${inter.variable}`}>
       <body className="bg-deep-bg text-white antialiased">
         <CartProvider>
-          <Navigation />
-          <main>{children}</main>
-          <Footer />
+          <PasswordProtection>
+            <Navigation />
+            <main>{children}</main>
+            <Footer />
+          </PasswordProtection>
         </CartProvider>
       </body>
     </html>
