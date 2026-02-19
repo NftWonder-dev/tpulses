@@ -23,7 +23,7 @@ export default function CollectionCard({ collection }) {
             <img
               src={urlFor(image).width(600).url()}
               alt={name}
-              className="w-full h-full object-cover opacity-70 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500 ease-in-out"
+              className="w-full h-full object-cover opacity-70 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000 ease-out"
               style={{
                 maskImage:
                   "linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 80%)",
