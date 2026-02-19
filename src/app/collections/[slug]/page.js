@@ -1,18 +1,21 @@
-import { client } from '@/lib/sanity'
-import { COLLECTION_BY_SLUG_QUERY } from '@/lib/queries'
-import CategoryCard from '@/components/ui/CategoryCard'
-import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { client } from "@/lib/sanity";
+import { COLLECTION_BY_SLUG_QUERY } from "@/lib/queries";
+import CategoryCard from "@/components/ui/CategoryCard";
+import ProductCard from "@/components/ui/ProductCard";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+
+export const revalidate = 60;
 
 async function getCollection(slug) {
-  return await client.fetch(COLLECTION_BY_SLUG_QUERY, { slug })
+  return await client.fetch(COLLECTION_BY_SLUG_QUERY, { slug });
 }
 
 export default async function CollectionPage({ params }) {
-  const collection = await getCollection(params.slug)
+  const collection = await getCollection(params.slug);
 
   if (!collection) {
-    return <div>Collection not found</div>
+    return <div>Collection not found</div>;
   }
 
   return (
@@ -34,7 +37,7 @@ export default async function CollectionPage({ params }) {
               <span className="text-6xl">{collection.emoji}</span>
             )}
             <h1 className="font-space-grotesk text-6xl font-bold">
-              {collection.name}
+              {collection.name} Collection
             </h1>
           </div>
           {collection.description && (
@@ -44,26 +47,43 @@ export default async function CollectionPage({ params }) {
           )}
         </div>
 
-        {/* Categories Grid */}
-        <div>
-          <h2 className="font-space-grotesk text-3xl font-bold mb-8">
-            Categories
-          </h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {collection.categories?.map((category) => (
-              <CategoryCard key={category._id} category={category} />
-            ))}
-          </div>
-
-          {(!collection.categories || collection.categories.length === 0) && (
-            <div className="text-center py-20">
-              <p className="text-slate-500">
-                No categories yet. Add some in Sanity Studio!
-              </p>
+        {/* Categories Grid - Only show if categories exist */}
+        {collection.categories && collection.categories.length > 0 && (
+          <div className="mb-16">
+            <h2 className="font-space-grotesk text-3xl font-bold mb-8">
+              Categories
+            </h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {collection.categories.map((category) => (
+                <CategoryCard key={category._id} category={category} />
+              ))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
+
+        {/* Products - Only show if NO categories exist */}
+        {(!collection.categories || collection.categories.length === 0) && (
+          <div>
+            <h2 className="font-space-grotesk text-3xl font-bold mb-8">
+              Products
+            </h2>
+
+            {collection.products && collection.products.length > 0 ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {collection.products.map((product) => (
+                  <ProductCard key={product._id} product={product} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-20">
+                <p className="text-slate-500">
+                  No products yet in this collection. Add some in Sanity Studio!
+                </p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
-  )
+  );
 }

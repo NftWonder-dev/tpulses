@@ -26,6 +26,24 @@ export const COLLECTION_BY_SLUG_QUERY = `*[_type == "collection" && slug.current
     image,
     order,
     "productCount": count(*[_type == "product" && references(^._id)])
+  },
+  "products": *[_type == "product" && references(^._id)] | order(order asc) {
+    _id,
+    name,
+    slug,
+    productCode,
+    percentage,
+    price,
+    description,
+    image,
+    previewImages,
+    order,
+    collection->{
+      _id,
+      name,
+      slug,
+      emoji
+    }
   }
 }`;
 
