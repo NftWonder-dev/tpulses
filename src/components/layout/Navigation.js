@@ -1,24 +1,54 @@
 "use client";
 
 import Link from "next/link";
-import { ShoppingCart, Activity, Menu, X } from "lucide-react";
+import { ShoppingCart, Waves, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { useCart } from "@/context/CartContext";
 
 export default function Navigation() {
   const { getCartCount } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleFreePack = async () => {
+    try {
+      setIsDownloading(true);
+
+      // Replace with your actual test file key
+      const testFileKey = "products/test-product-1/test-product-1.zip";
+
+      const response = await fetch("/api/download", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileKey: testFileKey }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate download link");
+      }
+
+      const { downloadUrl } = await response.json();
+
+      // Open download in new tab
+      window.open(downloadUrl, "_blank");
+    } catch (error) {
+      console.error("Download error:", error);
+      alert("Failed to download. Please try again.");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   return (
     <nav className="fixed top-0 w-full z-50 border-b border-white/5 bg-deep-bg/80 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 cursor-pointer">
-          <div className="w-6 h-6 bg-gradient-to-tr from-cyan-500 to-magenta-500 rounded-sm rotate-45 flex items-center justify-center">
-            <Activity className="w-6 h-6 text-white -rotate-45" />
+          <div className="w-8 h-8 bg-gradient-to-tr from-cyan-500 to-magenta-500 rounded-sm rotate-45 flex items-center justify-center">
+            <Waves className="w-5 h-5 text-white -rotate-45" />
           </div>
           <span className="font-space-grotesk font-bold text-xl tracking-tighter uppercase">
-            TRIM Pulses
+            TPulses
           </span>
         </Link>
 
@@ -57,8 +87,12 @@ export default function Navigation() {
               </span>
             )}
           </Link>
-          <button className="bg-white text-black px-5 py-2 rounded-full text-xs font-bold uppercase tracking-tighter hover:bg-cyan-400 transition-all duration-300">
-            Get Free Pack
+          <button
+            onClick={handleFreePack}
+            disabled={isDownloading}
+            className="bg-white text-black px-5 py-2 rounded-full text-xs font-bold uppercase tracking-tighter hover:bg-cyan-400 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isDownloading ? "Loading..." : "Get Free Pack"}
           </button>
         </div>
 
@@ -117,8 +151,15 @@ export default function Navigation() {
             >
               Specifications
             </a>
-            <button className="w-full bg-white text-black px-5 py-3 rounded-full text-sm font-bold uppercase tracking-tighter hover:bg-cyan-400 transition-all duration-300 mt-4">
-              Get Free Pack
+            <button
+              onClick={() => {
+                handleFreePack();
+                setMobileMenuOpen(false);
+              }}
+              disabled={isDownloading}
+              className="w-full bg-white text-black px-5 py-3 rounded-full text-sm font-bold uppercase tracking-tighter hover:bg-cyan-400 transition-all duration-300 mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isDownloading ? "Loading..." : "Get Free Pack"}
             </button>
           </div>
         </div>

@@ -134,6 +134,11 @@ export const PRODUCT_BY_SLUG_QUERY = `*[_type == "product" && slug.current == $s
   image,
   previewImages,
   youtubeVideoId,
+  decayCurve,        // ← ADD
+  modes,             // ← ADD
+  processedVariations, // ← ADD
+  totalFiles,        // ← ADD
+  s3FileKey,  // ← ADD THIS
   fileUrl,
   fileSize,
   fileFormat,
