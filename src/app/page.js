@@ -59,7 +59,7 @@ export default async function HomePage() {
                 Explore Collections <ArrowRight className="w-4 h-4" />
               </Link>
               <div className="text-[10px] font-space-mono text-slate-500 uppercase flex flex-col">
-                <span>Current Phase: 02.2026 update</span>
+                <span>Current Phase: 06.2026 update</span>
                 <span>Resonance Matrix: Active</span>
               </div>
             </div>
