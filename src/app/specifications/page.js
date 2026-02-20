@@ -108,7 +108,7 @@ export default function SpecificationsPage() {
                     key={tone}
                     className="glass-card p-1 rounded-xl text-center"
                   >
-                    <h3 className="font-space-grotesk text-2xl font-bold text-cyan-400">
+                    <h3 className="font-space-grotesk text-2xl font-bold text-slatle-400">
                       {tone}
                     </h3>
                   </div>

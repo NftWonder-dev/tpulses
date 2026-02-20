@@ -145,7 +145,7 @@ export default function Navigation() {
               FAQ
             </Link>
             <a
-              href="#technical"
+              href="/specifications"
               className="block font-space-mono text-sm uppercase tracking-widest text-slate-400 hover:text-cyan-400 transition-colors py-2"
               onClick={() => setMobileMenuOpen(false)}
             >
