@@ -48,7 +48,7 @@ export default function Navigation() {
             <Activity className="w-5 h-5 text-white -rotate-45" />
           </div>
           <span className="font-space-grotesk font-bold text-xl tracking-tighter uppercase">
-            TPulses
+            TRIM Pulses
           </span>
         </Link>
 
