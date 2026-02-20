@@ -167,9 +167,7 @@ export async function POST(request) {
   <p style="text-align: center;">
     If you have any questions or issues with your downloads, please don't hesitate to contact us.
   </p>
-  <p style="margin: 0; text-align: center;">
-    Compatible with all major DAWs and convolution reverb plugins.
-  </p>
+  
 </div>
             </div>
             
