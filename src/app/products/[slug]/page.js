@@ -230,7 +230,7 @@ export default async function ProductPage({ params }) {
                 )}
                 {product.processedVariations && (
                   <div className="text-slate-500">
-                    Processed Variations:{" "}
+                    Algorithmic Variations:{" "}
                     <span className="text-white">
                       {product.processedVariations}
                     </span>
