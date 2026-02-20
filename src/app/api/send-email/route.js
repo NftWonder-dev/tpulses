@@ -168,7 +168,7 @@ export async function POST(request) {
     If you have any questions or issues with your downloads, please don't hesitate to contact us.
   </p>
   <p style="margin: 0; text-align: center;">
-    Compatible with all convolution reverb plugins.
+    Compatible with allll convolution reverb plugins.
   </p>
 </div>
             </div>
