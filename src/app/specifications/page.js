@@ -183,7 +183,7 @@ export default function SpecificationsPage() {
           {/* Algorithmic Variations */}
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <img
-              src="https://i.imgur.com/lRh1prx.png"
+              src="https://i.imgur.com/ReiEZ8J.png"
               alt="Algorithmic Variations"
               className="w-full rounded-lg"
             />
