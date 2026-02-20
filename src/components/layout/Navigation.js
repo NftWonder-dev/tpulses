@@ -70,7 +70,7 @@ export default function Navigation() {
             FAQ
           </Link>
           <a
-            href="#technical"
+            href="/specifications"
             className="hover:text-cyan-400 transition-colors"
           >
             Specifications
