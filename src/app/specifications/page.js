@@ -8,7 +8,8 @@ export default function SpecificationsPage() {
       <section className="pt-32 pb-20 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="max-w-3xl">
-            <h1 className="font-space-grotesk text-6xl md:text-7xl font-bold mb-6 leading-tight">
+            <h1 className="font-space-grotesk text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+              {" "}
               Technical <span className="text-gradient">Specifications</span>
             </h1>
             <p className="text-slate-400 text-xl leading-relaxed">
@@ -63,9 +64,9 @@ export default function SpecificationsPage() {
                 </li>
               </ul>
             </div>
-            <div className="glass-card p-8 rounded-xl">
+            <div className="glass-card p-2 rounded-xl">
               <img
-                src="https://i.imgur.com/3zXHHPV.png"
+                src="https://i.imgur.com/cvxnKik.png"
                 alt="Sample Rate Folders"
                 className="w-full rounded-lg"
               />
@@ -74,9 +75,9 @@ export default function SpecificationsPage() {
 
           {/* Tone Folders */}
           <div className="grid lg:grid-cols-2 gap-12 items-center mb-20">
-            <div className="order-2 lg:order-1 glass-card p-8 rounded-xl">
+            <div className="order-2 lg:order-1 glass-card p-2 rounded-xl">
               <img
-                src="https://i.imgur.com/tSxn9NT.png"
+                src="https://i.imgur.com/mTOhE8s.png"
                 alt="Twelve Semitone Folders"
                 className="w-full rounded-lg"
               />
@@ -107,7 +108,7 @@ export default function SpecificationsPage() {
                 ].map((tone) => (
                   <div
                     key={tone}
-                    className="glass-card p-2 rounded-xl text-center hover:border-cyan-400/50 transition-all"
+                    className="glass-card p-1 rounded-xl text-center hover:border-cyan-400/50 transition-all"
                   >
                     <h3 className="font-space-grotesk text-2xl font-bold text-cyan-400">
                       {tone}
@@ -164,9 +165,9 @@ export default function SpecificationsPage() {
                 </div>
               </div>
             </div>
-            <div className="glass-card p-8 rounded-xl">
+            <div className="glass-card p-2 rounded-xl">
               <img
-                src="https://i.imgur.com/qiglDgv.png"
+                src="https://i.imgur.com/BSE08Jh.png"
                 alt="Modal Variations"
                 className="w-full rounded-lg"
               />
@@ -175,9 +176,9 @@ export default function SpecificationsPage() {
 
           {/* Algorithmic Variations */}
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="order-2 lg:order-1 glass-card p-8 rounded-xl">
+            <div className="order-2 lg:order-1 glass-card p-2 rounded-xl">
               <img
-                src="https://i.imgur.com/PCxiYud.png"
+                src="https://i.imgur.com/lRh1prx.png"
                 alt="Algorithmic Variations"
                 className="w-full rounded-lg"
               />
@@ -234,7 +235,7 @@ export default function SpecificationsPage() {
       </section>
 
       {/* File Naming Lexicon */}
-      <section className="py-20 px-6 bg-white/[0.02]">
+      <section className="py-20 px-6 bg-white/[0.02] overflow-hidden">
         <div className="max-w-5xl mx-auto">
           <h2 className="font-space-grotesk text-4xl font-bold mb-8 text-center">
             File Naming Convention
@@ -244,10 +245,10 @@ export default function SpecificationsPage() {
             used in file naming
           </p>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
             {/* Left Column */}
-            <div className="glass-card p-6 rounded-xl">
-              <div className="space-y-3 text-sm">
+            <div className="glass-card p-4 md:p-6 rounded-xl overflow-hidden">
+              <div className="space-y-3 text-xs md:text-sm">
                 {[
                   ["AS", "All Stereo"],
                   ["AST", "Astroid Curve"],
@@ -276,20 +277,22 @@ export default function SpecificationsPage() {
                 ].map(([code, desc]) => (
                   <div
                     key={code}
-                    className="flex justify-between border-b border-white/5 pb-2"
+                    className="flex justify-between gap-2 border-b border-white/5 pb-2"
                   >
-                    <span className="font-space-mono text-cyan-400">
+                    <span className="font-space-mono text-cyan-400 shrink-0">
                       {code}
                     </span>
-                    <span className="text-slate-400 text-right">{desc}</span>
+                    <span className="text-slate-400 text-right break-words">
+                      {desc}
+                    </span>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Right Column */}
-            <div className="glass-card p-6 rounded-xl">
-              <div className="space-y-3 text-sm">
+            <div className="glass-card p-4 md:p-6 rounded-xl overflow-hidden">
+              <div className="space-y-3 text-xs md:text-sm">
                 {[
                   ["MF", "Medium Fall"],
                   ["MS", "Mid-Side Processed"],
@@ -318,12 +321,14 @@ export default function SpecificationsPage() {
                 ].map(([code, desc]) => (
                   <div
                     key={code}
-                    className="flex justify-between border-b border-white/5 pb-2"
+                    className="flex justify-between gap-2 border-b border-white/5 pb-2"
                   >
-                    <span className="font-space-mono text-cyan-400">
+                    <span className="font-space-mono text-cyan-400 shrink-0">
                       {code}
                     </span>
-                    <span className="text-slate-400 text-right">{desc}</span>
+                    <span className="text-slate-400 text-right break-words">
+                      {desc}
+                    </span>
                   </div>
                 ))}
               </div>
