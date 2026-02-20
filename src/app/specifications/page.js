@@ -64,24 +64,22 @@ export default function SpecificationsPage() {
                 </li>
               </ul>
             </div>
-            <div className="glass-card p-2 rounded-xl">
-              <img
-                src="https://i.imgur.com/cvxnKik.png"
-                alt="Sample Rate Folders"
-                className="w-full rounded-lg"
-              />
-            </div>
+
+            <img
+              src="https://i.imgur.com/cvxnKik.png"
+              alt="Sample Rate Folders"
+              className="w-full rounded-lg"
+            />
           </div>
 
           {/* Tone Folders */}
           <div className="grid lg:grid-cols-2 gap-12 items-center mb-20">
-            <div className="order-2 lg:order-1 glass-card p-2 rounded-xl">
-              <img
-                src="https://i.imgur.com/mTOhE8s.png"
-                alt="Twelve Semitone Folders"
-                className="w-full rounded-lg"
-              />
-            </div>
+            <img
+              src="https://i.imgur.com/mTOhE8s.png"
+              alt="Twelve Semitone Folders"
+              className="w-full rounded-lg"
+            />
+
             <div className="order-1 lg:order-2">
               <h3 className="font-space-grotesk text-3xl font-bold mb-6">
                 Twelve Semitone Folders
@@ -108,7 +106,7 @@ export default function SpecificationsPage() {
                 ].map((tone) => (
                   <div
                     key={tone}
-                    className="glass-card p-1 rounded-xl text-center hover:border-cyan-400/50 transition-all"
+                    className="glass-card p-1 rounded-xl text-center"
                   >
                     <h3 className="font-space-grotesk text-2xl font-bold text-cyan-400">
                       {tone}
@@ -134,55 +132,62 @@ export default function SpecificationsPage() {
                 providing rich harmonic options for diverse musical contexts:
               </p>
               <div className="space-y-4">
-                <div className="glass-card p-6 rounded-xl">
-                  <h4 className="font-space-grotesk text-xl font-bold text-cyan-400 mb-2">
-                    MAJOR
-                  </h4>
-                  <p className="text-slate-400">
-                    Traditional major mode with bright, consonant harmonic
-                    character. Perfect for uplifting and positive musical
-                    contexts.
-                  </p>
-                </div>
-                <div className="glass-card p-6 rounded-xl">
-                  <h4 className="font-space-grotesk text-xl font-bold text-cyan-400 mb-2">
-                    DIM (Diminished)
-                  </h4>
-                  <p className="text-slate-400">
-                    Diminished tonality offering tension and instability. Ideal
-                    for dramatic transitions and experimental soundscapes.
-                  </p>
-                </div>
-                <div className="glass-card p-6 rounded-xl">
-                  <h4 className="font-space-grotesk text-xl font-bold text-cyan-400 mb-2">
-                    SUS2 & SUS4
-                  </h4>
-                  <p className="text-slate-400">
-                    Suspended chords creating harmonic ambiguity and openness.
-                    Excellent for ambient, atmospheric, and modern production
-                    styles.
-                  </p>
-                </div>
+                <ul className="space-y-4 text-slate-400">
+                  <li className="flex items-start gap-3">
+                    <span className="text-cyan-400 mt-1">•</span>
+                    <span>
+                      <strong className="text-white">MAJOR</strong> -
+                      Traditional major mode with bright, consonant harmonic
+                      character. Perfect for uplifting and positive musical
+                      contexts.
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="text-cyan-400 mt-1">•</span>
+                    <span>
+                      <strong className="text-white">MINOR</strong> -
+                      Traditional minor mode with dark, consonant harmonic
+                      character. Ideal for introspective and melancholic musical
+                      contexts.
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="text-cyan-400 mt-1">•</span>
+                    <span>
+                      <strong className="text-white">DIM (Diminished)</strong> -
+                      Diminished tonality offering tension and instability.
+                      Ideal for dramatic transitions and experimental
+                      soundscapes.
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="text-cyan-400 mt-1">•</span>
+                    <span>
+                      <strong className="text-white">SUS2 & SUS4</strong> -
+                      Suspended chords creating harmonic ambiguity and openness.
+                      Excellent for ambient, atmospheric, and modern production
+                      styles.
+                    </span>
+                  </li>
+                </ul>
               </div>
             </div>
-            <div className="glass-card p-2 rounded-xl">
-              <img
-                src="https://i.imgur.com/BSE08Jh.png"
-                alt="Modal Variations"
-                className="w-full rounded-lg"
-              />
-            </div>
+
+            <img
+              src="https://i.imgur.com/BSE08Jh.png"
+              alt="Modal Variations"
+              className="w-full rounded-lg"
+            />
           </div>
 
           {/* Algorithmic Variations */}
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="order-2 lg:order-1 glass-card p-2 rounded-xl">
-              <img
-                src="https://i.imgur.com/lRh1prx.png"
-                alt="Algorithmic Variations"
-                className="w-full rounded-lg"
-              />
-            </div>
+            <img
+              src="https://i.imgur.com/lRh1prx.png"
+              alt="Algorithmic Variations"
+              className="w-full rounded-lg"
+            />
+
             <div className="order-1 lg:order-2">
               <h3 className="font-space-grotesk text-3xl font-bold mb-6">
                 Algorithmic Variations
@@ -362,7 +367,7 @@ export default function SpecificationsPage() {
             ].map((daw) => (
               <div
                 key={daw.name}
-                className="glass-card p-6 rounded-xl text-center hover:border-cyan-400/50 transition-all"
+                className="glass-card p-6 rounded-xl text-center"
               >
                 <h3 className="font-space-grotesk text-xl font-bold mb-2">
                   {daw.name}
