@@ -267,7 +267,7 @@ export default async function ProductPage({ params }) {
                   This product includes instant download access.
                 </p>
                 <p className="text-xs text-slate-500">
-                  Compatible with all major DAWs and convolution reverb plugins.
+                  Compatible with all convolution reverb plugins.
                 </p>
               </div>
             )}
