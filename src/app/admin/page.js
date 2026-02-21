@@ -341,13 +341,14 @@ function ProductForm({ product, collections, categories, subpacks, onSave, onCan
     collectionId: product.collection?._id || '',
     categoryId: product.category?._id || '', subpackId: product.subpack?._id || '', image: product.image || null,
   } : { ...EMPTY })
-  const [saving, setSaving] = useState(false)
+  const [saving, setSaving] = useState(null) // null | 'draft' | 'publish'
   function set(k, v) { setForm(f => ({ ...f, [k]: v })) }
   function handleName(v) { set('name', v); if (!isEdit) set('slug', slugify(v)) }
 
-  async function handleSave() {
+  async function handleSave(publish = false) {
     if (!form.name || !form.slug) { onToast('Name and slug required', 'error'); return }
-    setSaving(true)
+    if (publish && !form.lemonsqueezyVariantId) { onToast('Paste the LemonSqueezy Variant ID before publishing', 'error'); return }
+    setSaving(publish ? 'publish' : 'draft')
     try {
       const doc = { _type: 'product', name: form.name, slug: { _type: 'slug', current: form.slug } }
       if (form.productCode) doc.productCode = form.productCode
@@ -362,28 +363,33 @@ function ProductForm({ product, collections, categories, subpacks, onSave, onCan
       if (form.modes) doc.modes = form.modes
       if (form.algorithmicVariations) doc.algorithmicVariations = form.algorithmicVariations
       if (form.totalFiles) doc.totalFiles = form.totalFiles
-      if (form.lemonsqueezyVariantId) doc.lemonsqueezyVariantId = form.lemonsqueezyVariantId
       if (form.image) doc.image = form.image
-      if (form.previewImages?.length) doc.previewImages = form.previewImages.map(img => ({
-        ...img,
-        _key: img._key || uid(),
-      }))
+      if (form.previewImages?.length) doc.previewImages = form.previewImages.map(img => ({ ...img, _key: img._key || uid() }))
+      if (form.lemonsqueezyVariantId) doc.lemonsqueezyVariantId = form.lemonsqueezyVariantId
       if (form.collectionId) doc.collection = { _type: 'reference', _ref: form.collectionId }
       if (form.categoryId) doc.category = { _type: 'reference', _ref: form.categoryId }
       if (form.subpackId) doc.subpack = { _type: 'reference', _ref: form.subpackId }
 
       if (isEdit) {
         await sanityWrite([{ patch: { id: product._id, set: doc } }])
+        if (publish) {
+          const publishedId = product._id.replace('drafts.', '')
+          await sanityWrite([{ createOrReplace: { _id: publishedId, ...doc } }])
+        }
         if (form.lemonsqueezyVariantId && String(form.price) !== String(product.price)) {
           await fetch('/api/admin/lemonsqueezy-variant', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ variantId: form.lemonsqueezyVariantId, price: form.price }) })
         }
       } else {
-        await sanityWrite([{ create: { _id: `drafts.${uid()}`, ...doc } }])
+        const draftId = 'drafts.' + uid()
+        await sanityWrite([{ create: { _id: draftId, ...doc } }])
+        if (publish) {
+          await sanityWrite([{ createOrReplace: { _id: uid(), ...doc } }])
+        }
       }
-      onToast(isEdit ? 'Product updated!' : 'Product created!', 'success')
+      onToast(publish ? 'Product published!' : 'Draft saved!', 'success')
       onSave()
     } catch (e) { onToast('Save failed: ' + e.message, 'error') }
-    finally { setSaving(false) }
+    finally { setSaving(null) }
   }
 
   const filteredCats = categories.filter(c => !form.collectionId || c.collection?._id === form.collectionId)
@@ -448,8 +454,17 @@ function ProductForm({ product, collections, categories, subpacks, onSave, onCan
             <Field label="LemonSqueezy Variant ID" hint="Create the product in LemonSqueezy first, then paste the Variant ID here">
               <Input value={form.lemonsqueezyVariantId} onChange={e => set('lemonsqueezyVariantId', e.target.value)} placeholder="e.g. 123456" />
             </Field>
-            {form.lemonsqueezyVariantId && <div className="flex items-center gap-2 text-emerald-400 text-xs font-mono"><CheckCircle size={13} />Variant {form.lemonsqueezyVariantId} linked</div>}
-            <a href="https://app.lemonsqueezy.com/products" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-xs font-mono text-slate-500 hover:text-cyan-400 transition-colors"><Link2 size={11} />Open LemonSqueezy to get Variant ID</a>
+            {form.lemonsqueezyVariantId
+              ? <div className="flex items-center gap-2 text-emerald-400 text-xs font-mono"><CheckCircle size={13} />Variant {form.lemonsqueezyVariantId} linked — ready to publish</div>
+              : <div className="rounded-lg border border-amber-500/25 bg-amber-500/5 p-3 space-y-2">
+                  <div className="flex items-center gap-2 text-amber-400 text-xs font-mono font-bold"><AlertCircle size={13} />Required to publish</div>
+                  <p className="text-slate-400 text-xs">Create this product in LemonSqueezy first, then paste the Variant ID above.</p>
+                  <a href="https://app.lemonsqueezy.com/products/new" target="_blank" rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-xs font-mono text-cyan-400 hover:text-cyan-300 transition-colors border border-cyan-500/25 rounded px-2 py-1 bg-cyan-500/5 hover:bg-cyan-500/10">
+                    <Link2 size={11} />Create product in LemonSqueezy →
+                  </a>
+                </div>
+            }
           </Card>
           <Card className="p-5 space-y-4">
             <p className="font-mono text-xs text-slate-500 uppercase tracking-wider">Product File</p>
@@ -464,7 +479,14 @@ function ProductForm({ product, collections, categories, subpacks, onSave, onCan
       </div>
       <div className="flex justify-end gap-3 pt-2">
         <Btn onClick={onCancel}>Cancel</Btn>
-        <Btn variant="primary" size="lg" loading={saving} onClick={handleSave}><CheckCircle size={14} />{isEdit ? 'Save Changes' : 'Create Product'}</Btn>
+        <Btn variant="default" size="lg" loading={saving === 'draft'} onClick={() => handleSave(false)}>
+          <File size={14} />{isEdit ? 'Save Draft' : 'Save as Draft'}
+        </Btn>
+        <Btn variant="primary" size="lg" loading={saving === 'publish'} onClick={() => handleSave(true)}
+          title={!form.lemonsqueezyVariantId ? 'Paste LemonSqueezy Variant ID first' : ''}
+          className={!form.lemonsqueezyVariantId ? 'opacity-50 cursor-not-allowed' : ''}>
+          <CheckCircle size={14} />{isEdit ? 'Save & Publish' : 'Publish'}
+        </Btn>
       </div>
     </div>
   )
@@ -519,13 +541,18 @@ function ProductsPanel({ onToast }) {
         {loading ? <div className="flex items-center justify-center py-16"><Spinner /></div> : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead><tr className="border-b border-white/5">{['Product', 'Collection', 'Price', 'Variant ID', 'File', ''].map(h => <th key={h} className="text-left px-4 py-3 text-xs font-mono text-slate-500 font-normal">{h}</th>)}</tr></thead>
+              <thead><tr className="border-b border-white/5">{['Product', 'Collection', 'Price', 'Status', 'Variant ID', 'File', ''].map(h => <th key={h} className="text-left px-4 py-3 text-xs font-mono text-slate-500 font-normal">{h}</th>)}</tr></thead>
               <tbody>
                 {filtered.map(p => (
                   <tr key={p._id} className="border-b border-white/[0.03] hover:bg-white/[0.02]">
                     <td className="px-4 py-3"><div className="text-white font-medium">{p.name}</div><div className="text-slate-500 text-xs font-mono">{p.slug?.current}</div></td>
                     <td className="px-4 py-3 text-slate-400 text-xs">{p.collection?.emoji} {p.collection?.name || '—'}</td>
                     <td className="px-4 py-3 font-mono text-white text-xs">€{p.price ?? '—'}</td>
+                    <td className="px-4 py-3">
+                      {p._id.startsWith('drafts.')
+                        ? <span className="text-xs px-2 py-0.5 rounded-full border font-mono bg-amber-500/10 text-amber-400 border-amber-500/25">draft</span>
+                        : <span className="text-xs px-2 py-0.5 rounded-full border font-mono bg-emerald-500/10 text-emerald-400 border-emerald-500/25">published</span>}
+                    </td>
                     <td className="px-4 py-3">{p.lemonsqueezyVariantId ? <span className="font-mono text-xs text-cyan-400">{p.lemonsqueezyVariantId}</span> : <span className="text-amber-400 text-xs flex items-center gap-1"><AlertCircle size={11} />missing</span>}</td>
                     <td className="px-4 py-3">{p.fileUrl ? <span className="text-emerald-400 text-xs flex items-center gap-1"><CheckCircle size={11} />uploaded</span> : <span className="text-amber-400 text-xs flex items-center gap-1"><AlertCircle size={11} />missing</span>}</td>
                     <td className="px-4 py-3"><div className="flex gap-1"><Btn size="sm" variant="ghost" onClick={() => setEditing(p)}><Edit size={12} /></Btn><Btn size="sm" variant="ghost" onClick={() => setConfirm(p)}><Trash2 size={12} className="text-red-400" /></Btn></div></td>
@@ -545,7 +572,7 @@ function ProductsPanel({ onToast }) {
 function HierarchyForm({ type, item, parents, onSave, onCancel, onToast }) {
   const isEdit = !!item?._id
   const [form, setForm] = useState({ name: item?.name || '', slug: item?.slug?.current || '', emoji: item?.emoji || '', description: item?.description || '', order: item?.order ?? '', parentId: (type === 'category' ? item?.collection?._id : item?.category?._id) || '' })
-  const [saving, setSaving] = useState(false)
+  const [saving, setSaving] = useState(null) // null | 'draft' | 'publish'
   function set(k, v) { setForm(f => ({ ...f, [k]: v })) }
 
   async function handleSave() {
