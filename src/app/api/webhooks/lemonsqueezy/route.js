@@ -57,19 +57,29 @@ export async function POST(request) {
       });
 
       // Send download email
-      await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/send-email`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          customerEmail,
-          customerName,
-          products: products.map((p) => ({
-            name: p.name,
-            fileKey: p.fileKey,
-          })),
-          orderTotal,
-        }),
-      });
+      const emailResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/send-email`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            customerEmail,
+            customerName,
+            products: products.map((p) => ({
+              name: p.name,
+              fileKey: p.fileKey,
+            })),
+            orderTotal,
+          }),
+        },
+      );
+
+      const emailResult = await emailResponse.json();
+      console.log("Email API response:", emailResponse.status, emailResult);
+
+      if (!emailResponse.ok) {
+        console.error("Email sending failed:", emailResult);
+      }
 
       console.log("✅ Order processed:", orderData.id);
     }
