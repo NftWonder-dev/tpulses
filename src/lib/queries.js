@@ -142,7 +142,7 @@ export const PRODUCT_BY_SLUG_QUERY = `*[_type == "product" && slug.current == $s
   fileUrl,
   fileSize,
   fileFormat,
-  lemonsqueezyProductId,
+  lemonsqueezyVariantId,
   collection->{
     _id,
     name,
