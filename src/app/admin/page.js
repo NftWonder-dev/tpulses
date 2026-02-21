@@ -127,6 +127,146 @@ function S3Uploader({ value, onChange, productSlug }) {
 }
 
 
+// ─── Rich Text Editor ─────────────────────────────────────────────────────
+
+function RichTextEditor({ value = [], onChange }) {
+  const ref = useRef()
+
+  // Convert Portable Text blocks to HTML for display
+  function blocksToHtml(blocks) {
+    if (!blocks?.length) return ''
+    return blocks.map(block => {
+      if (block._type !== 'block') return ''
+      const text = (block.children || []).map(span => {
+        let t = span.text || ''
+        if (span.marks?.includes('strong')) t = `<strong>${t}</strong>`
+        if (span.marks?.includes('em')) t = `<em>${t}</em>`
+        if (span.marks?.includes('code')) t = `<code>${t}</code>`
+        return t
+      }).join('')
+      const style = block.style || 'normal'
+      if (style === 'h2') return `<h2>${text}</h2>`
+      if (style === 'h3') return `<h3>${text}</h3>`
+      if (style === 'blockquote') return `<blockquote>${text}</blockquote>`
+      return `<p>${text || '<br>'}</p>`
+    }).join('')
+  }
+
+  // Convert contentEditable innerHTML back to Portable Text blocks
+  function htmlToBlocks(html) {
+    const div = document.createElement('div')
+    div.innerHTML = html
+    const blocks = []
+    div.childNodes.forEach(node => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        if (node.textContent.trim()) {
+          blocks.push({ _type: 'block', _key: uid(), style: 'normal', markDefs: [], children: [{ _type: 'span', _key: uid(), text: node.textContent, marks: [] }] })
+        }
+        return
+      }
+      const tag = node.tagName?.toLowerCase()
+      let style = 'normal'
+      if (tag === 'h2') style = 'h2'
+      if (tag === 'h3') style = 'h3'
+      if (tag === 'blockquote') style = 'blockquote'
+
+      const children = []
+      node.childNodes.forEach(child => {
+        const marks = []
+        let text = ''
+        if (child.nodeType === Node.TEXT_NODE) {
+          text = child.textContent
+        } else {
+          const ct = child.tagName?.toLowerCase()
+          text = child.textContent
+          if (ct === 'strong' || ct === 'b') marks.push('strong')
+          if (ct === 'em' || ct === 'i') marks.push('em')
+          if (ct === 'code') marks.push('code')
+          // Nested marks
+          child.childNodes?.forEach(grandchild => {
+            if (grandchild.nodeType !== Node.TEXT_NODE) {
+              const gt = grandchild.tagName?.toLowerCase()
+              if (gt === 'strong' || gt === 'b') marks.push('strong')
+              if (gt === 'em' || gt === 'i') marks.push('em')
+            }
+          })
+        }
+        if (text) children.push({ _type: 'span', _key: uid(), text, marks: [...new Set(marks)] })
+      })
+
+      if (children.length === 0 && node.textContent) {
+        children.push({ _type: 'span', _key: uid(), text: node.textContent, marks: [] })
+      }
+
+      blocks.push({ _type: 'block', _key: uid(), style, markDefs: [], children })
+    })
+    return blocks
+  }
+
+  function exec(cmd, val) {
+    ref.current?.focus()
+    document.execCommand(cmd, false, val)
+    sync()
+  }
+
+  function sync() {
+    if (ref.current) onChange(htmlToBlocks(ref.current.innerHTML))
+  }
+
+  // Initialise HTML from blocks on first render
+  useEffect(() => {
+    if (ref.current && value?.length) {
+      const html = blocksToHtml(value)
+      if (ref.current.innerHTML !== html) ref.current.innerHTML = html
+    }
+  }, []) // only on mount
+
+  const btnClass = "px-2 py-1 rounded text-slate-400 hover:bg-white/10 hover:text-white transition-colors font-mono text-xs"
+
+  return (
+    <Field label="Description">
+      {/* Toolbar */}
+      <div className="flex items-center gap-0.5 px-2 py-1.5 border border-white/[0.08] border-b-0 rounded-t-lg bg-white/[0.03]">
+        <button type="button" className={btnClass} onClick={() => exec('bold')} title="Bold"><strong>B</strong></button>
+        <button type="button" className={btnClass} onClick={() => exec('italic')} title="Italic"><em>I</em></button>
+        <button type="button" className={btnClass} onClick={() => exec('formatBlock', 'h2')} title="Heading 2">H2</button>
+        <button type="button" className={btnClass} onClick={() => exec('formatBlock', 'h3')} title="Heading 3">H3</button>
+        <button type="button" className={btnClass} onClick={() => exec('formatBlock', 'p')} title="Normal">¶</button>
+        <div className="w-px h-4 bg-white/10 mx-1" />
+        <button type="button" className={btnClass} onClick={() => exec('insertUnorderedList')} title="Bullet list">• list</button>
+        <button type="button" className={btnClass} onClick={() => exec('insertOrderedList')} title="Numbered list">1. list</button>
+        <div className="w-px h-4 bg-white/10 mx-1" />
+        <button type="button" className={btnClass} onClick={() => exec('removeFormat')} title="Clear format">✕ fmt</button>
+      </div>
+      {/* Editable area */}
+      <div
+        ref={ref}
+        contentEditable
+        suppressContentEditableWarning
+        onInput={sync}
+        onBlur={sync}
+        className="min-h-40 w-full bg-white/[0.04] border border-white/[0.08] rounded-b-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-500/50 transition-colors prose prose-invert prose-sm max-w-none"
+        style={{
+          lineHeight: '1.6',
+        }}
+      />
+      <style>{`
+        [contenteditable] p { margin: 0 0 0.5em; }
+        [contenteditable] h2 { font-size: 1.2em; font-weight: bold; margin: 0.75em 0 0.25em; color: white; }
+        [contenteditable] h3 { font-size: 1.05em; font-weight: bold; margin: 0.5em 0 0.25em; color: white; }
+        [contenteditable] strong { color: white; }
+        [contenteditable] em { color: #67e8f9; }
+        [contenteditable] code { background: rgba(255,255,255,0.08); padding: 1px 4px; border-radius: 3px; font-family: monospace; font-size: 0.9em; }
+        [contenteditable] ul { list-style: disc; padding-left: 1.5em; margin: 0.5em 0; }
+        [contenteditable] ol { list-style: decimal; padding-left: 1.5em; margin: 0.5em 0; }
+        [contenteditable]:empty:before { content: attr(data-placeholder); color: #475569; }
+        [contenteditable]:focus { outline: none; }
+      `}</style>
+    </Field>
+  )
+}
+
+
 function PreviewImagesUploader({ value = [], onChange }) {
   const [uploading, setUploading] = useState(false)
   const ref = useRef()
@@ -182,7 +322,7 @@ function PreviewImagesUploader({ value = [], onChange }) {
   )
 }
 
-const EMPTY = { name: '', slug: '', productCode: '', price: '', description: '', percentage: '', fileUrl: '', lemonsqueezyVariantId: '', collectionId: '', categoryId: '', subpackId: '', image: null, previewImages: [] }
+const EMPTY = { name: '', slug: '', productCode: '', price: '', description: [], percentage: '', fileUrl: '', lemonsqueezyVariantId: '', collectionId: '', categoryId: '', subpackId: '', image: null, previewImages: [] }
 
 function ProductForm({ product, collections, categories, subpacks, onSave, onCancel, onToast }) {
   const isEdit = !!product?._id
@@ -190,9 +330,7 @@ function ProductForm({ product, collections, categories, subpacks, onSave, onCan
     name: product.name || '', slug: product.slug?.current || '', productCode: product.productCode || '',
     price: product.price || '', description: product.description || '', percentage: product.percentage || '',
     fileUrl: product.fileUrl || '', lemonsqueezyVariantId: product.lemonsqueezyVariantId || '',
-    description: Array.isArray(product.description)
-      ? product.description.map(b => b.children?.map(c => c.text).join('')).join('\n')
-      : (product.description || ''),
+    description: product.description || [],
     collectionId: product.collection?._id || '',
     categoryId: product.category?._id || '', subpackId: product.subpack?._id || '', image: product.image || null,
   } : { ...EMPTY })
@@ -207,15 +345,7 @@ function ProductForm({ product, collections, categories, subpacks, onSave, onCan
       const doc = { _type: 'product', name: form.name, slug: { _type: 'slug', current: form.slug } }
       if (form.productCode) doc.productCode = form.productCode
       if (form.price) doc.price = parseFloat(form.price)
-      if (form.description) doc.description = [
-        {
-          _type: 'block',
-          _key: uid(),
-          style: 'normal',
-          markDefs: [],
-          children: [{ _type: 'span', _key: uid(), text: form.description, marks: [] }]
-        }
-      ]
+      if (form.description?.length) doc.description = form.description
       if (form.percentage) doc.percentage = parseFloat(form.percentage)
       if (form.fileUrl) doc.fileUrl = form.fileUrl
       if (form.lemonsqueezyVariantId) doc.lemonsqueezyVariantId = form.lemonsqueezyVariantId
@@ -259,7 +389,7 @@ function ProductForm({ product, collections, categories, subpacks, onSave, onCan
             <Field label="Slug *" hint="Auto-generated from name"><Input value={form.slug} onChange={e => set('slug', e.target.value)} /></Field>
             <Field label="Product Code"><Input value={form.productCode} onChange={e => set('productCode', e.target.value)} placeholder="29-16-hs-ipiflattop" /></Field>
             <Field label="Percentage"><Input type="number" value={form.percentage} onChange={e => set('percentage', e.target.value)} placeholder="29.16" /></Field>
-            <Field label="Description"><Textarea value={form.description} onChange={e => set('description', e.target.value)} rows={4} placeholder="Product description…" /></Field>
+            <RichTextEditor value={form.description} onChange={v => set('description', v)} />
           </Card>
           <Card className="p-5 space-y-4">
             <p className="font-mono text-xs text-slate-500 uppercase tracking-wider">Hierarchy</p>
@@ -397,15 +527,7 @@ function HierarchyForm({ type, item, parents, onSave, onCancel, onToast }) {
       const slug = form.slug || slugify(form.name)
       const doc = { _type: type, name: form.name, slug: { _type: 'slug', current: slug } }
       if (form.emoji) doc.emoji = form.emoji
-      if (form.description) doc.description = [
-        {
-          _type: 'block',
-          _key: uid(),
-          style: 'normal',
-          markDefs: [],
-          children: [{ _type: 'span', _key: uid(), text: form.description, marks: [] }]
-        }
-      ]
+      if (form.description?.length) doc.description = form.description
       if (form.order !== '') doc.order = parseInt(form.order)
       if (type === 'category' && form.parentId) doc.collection = { _type: 'reference', _ref: form.parentId }
       if (type === 'subpack' && form.parentId) doc.category = { _type: 'reference', _ref: form.parentId }
