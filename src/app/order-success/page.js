@@ -12,7 +12,7 @@ export default function OrderSuccessPage() {
   useEffect(() => {
     // Clear cart after successful order
     clearCart();
-  }, [clearCart]);
+  }, []);
 
   return (
     <div className="min-h-screen pt-32 pb-20">
