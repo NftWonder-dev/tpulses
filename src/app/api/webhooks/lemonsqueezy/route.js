@@ -1,6 +1,7 @@
-// app/api/webhooks/lemonsqueezy/route.js - Handle LemonSqueezy webhooks
+// app/api/webhooks/lemonsqueezy/route.js - Query Sanity for product details
 import { NextResponse } from "next/server";
 import { verifyWebhookSignature } from "@/lib/lemonsqueezy";
+import { client } from "@/lib/sanity";
 
 export async function POST(request) {
   try {
@@ -18,38 +19,49 @@ export async function POST(request) {
     // Handle order_created event
     if (event.meta.event_name === "order_created") {
       const orderData = event.data;
-      const customData =
-        orderData.attributes.first_order_item?.custom_data || {};
 
       // Extract customer info
       const customerEmail = orderData.attributes.user_email;
       const customerName = orderData.attributes.user_name;
-      const orderTotal = (orderData.attributes.total / 100).toFixed(2); // Convert cents to euros
+      const orderTotal = (orderData.attributes.total / 100).toFixed(2);
 
-      // Parse custom data (it's now a stringified array)
-      let products = [];
-      try {
-        const customArray = JSON.parse(
-          orderData.attributes.first_order_item?.custom || "[]",
-        );
-        const customDataParsed = customArray[0]
-          ? JSON.parse(customArray[0])
-          : {};
-        products = customDataParsed.products || [];
-      } catch (error) {
-        console.error("Error parsing custom data:", error);
-        // Fallback - try to get from old format
-        products = customData?.products || [];
+      // Get variant ID(s) from order
+      const variantId = orderData.attributes.first_order_item?.variant_id?.toString();
+      
+      console.log('Order variant ID:', variantId);
+
+      if (!variantId) {
+        console.error('No variant ID in order');
+        return NextResponse.json({ error: 'No variant ID' }, { status: 400 });
       }
 
-      console.log("Products to email:", products);
+      // Query Sanity for product with this variant ID
+      const query = `*[_type == "product" && lemonsqueezyVariantId == $variantId][0] {
+        name,
+        fileUrl
+      }`;
 
-      console.log(
-        "Raw custom data:",
-        orderData.attributes.first_order_item?.custom,
-      );
-      console.log("Parsed products:", products);
-      console.log("Email payload:", {
+      const product = await client.fetch(query, { variantId });
+
+      console.log('Product from Sanity:', product);
+
+      if (!product) {
+        console.error('Product not found in Sanity for variant:', variantId);
+        return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+      }
+
+      if (!product.fileUrl) {
+        console.error('Product missing fileUrl:', product);
+        return NextResponse.json({ error: 'Product missing file' }, { status: 400 });
+      }
+
+      const products = [{
+        name: product.name,
+        fileKey: product.fileUrl,
+      }];
+
+      console.log('Products to email:', products);
+      console.log('Email payload:', {
         customerEmail,
         customerName,
         products,
@@ -57,31 +69,27 @@ export async function POST(request) {
       });
 
       // Send download email
-      const emailResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/send-email`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            customerEmail,
-            customerName,
-            products: products.map((p) => ({
-              name: p.name,
-              fileKey: p.fileKey,
-            })),
-            orderTotal,
-          }),
-        },
-      );
+      const emailResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/send-email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customerEmail,
+          customerName,
+          products,
+          orderTotal,
+        }),
+      });
 
       const emailResult = await emailResponse.json();
-      console.log("Email API response:", emailResponse.status, emailResult);
+      console.log('Email API response:', emailResponse.status, emailResult);
 
       if (!emailResponse.ok) {
-        console.error("Email sending failed:", emailResult);
+        console.error('Email sending failed:', emailResult);
+      } else {
+        console.log('✅ Email sent successfully!');
       }
 
-      console.log("✅ Order processed:", orderData.id);
+      console.log('✅ Order processed:', orderData.id);
     }
 
     return NextResponse.json({ received: true });
