@@ -322,7 +322,7 @@ function PreviewImagesUploader({ value = [], onChange }) {
   )
 }
 
-const EMPTY = { name: '', slug: '', productCode: '', price: '', description: [], percentage: '', fileUrl: '', lemonsqueezyVariantId: '', collectionId: '', categoryId: '', subpackId: '', image: null, previewImages: [] }
+const EMPTY = { name: '', slug: '', productCode: '', price: '', description: [], percentage: '', fileUrl: '', lemonsqueezyVariantId: '', collectionId: '', categoryId: '', subpackId: '', image: null, previewImages: [], youtubeVideoId: '', fileSize: '', fileFormat: '', decayCurve: '', modes: '', algorithmicVariations: '', totalFiles: '' }
 
 function ProductForm({ product, collections, categories, subpacks, onSave, onCancel, onToast }) {
   const isEdit = !!product?._id
@@ -331,6 +331,13 @@ function ProductForm({ product, collections, categories, subpacks, onSave, onCan
     price: product.price || '', description: product.description || '', percentage: product.percentage || '',
     fileUrl: product.fileUrl || '', lemonsqueezyVariantId: product.lemonsqueezyVariantId || '',
     description: product.description || [],
+    youtubeVideoId: product.youtubeVideoId || '',
+    fileSize: product.fileSize || '',
+    fileFormat: product.fileFormat || '',
+    decayCurve: product.decayCurve || '',
+    modes: product.modes || '',
+    algorithmicVariations: product.algorithmicVariations || '',
+    totalFiles: product.totalFiles || '',
     collectionId: product.collection?._id || '',
     categoryId: product.category?._id || '', subpackId: product.subpack?._id || '', image: product.image || null,
   } : { ...EMPTY })
@@ -348,6 +355,13 @@ function ProductForm({ product, collections, categories, subpacks, onSave, onCan
       if (form.description?.length) doc.description = form.description
       if (form.percentage) doc.percentage = String(form.percentage)
       if (form.fileUrl) doc.fileUrl = form.fileUrl
+      if (form.youtubeVideoId) doc.youtubeVideoId = form.youtubeVideoId
+      if (form.fileSize) doc.fileSize = form.fileSize
+      if (form.fileFormat) doc.fileFormat = form.fileFormat
+      if (form.decayCurve) doc.decayCurve = form.decayCurve
+      if (form.modes) doc.modes = form.modes
+      if (form.algorithmicVariations) doc.algorithmicVariations = form.algorithmicVariations
+      if (form.totalFiles) doc.totalFiles = form.totalFiles
       if (form.lemonsqueezyVariantId) doc.lemonsqueezyVariantId = form.lemonsqueezyVariantId
       if (form.image) doc.image = form.image
       if (form.previewImages?.length) doc.previewImages = form.previewImages.map(img => ({
@@ -390,6 +404,20 @@ function ProductForm({ product, collections, categories, subpacks, onSave, onCan
             <Field label="Product Code"><Input value={form.productCode} onChange={e => set('productCode', e.target.value)} placeholder="29-16-hs-ipiflattop" /></Field>
             <Field label="Percentage"><Input type="number" value={form.percentage} onChange={e => set('percentage', e.target.value)} placeholder="29.16" /></Field>
             <RichTextEditor value={form.description} onChange={v => set('description', v)} />
+          </Card>
+          <Card className="p-5 space-y-4">
+            <p className="font-mono text-xs text-slate-500 uppercase tracking-wider">Media & Specs</p>
+            <Field label="YouTube Video ID" hint='e.g. "dQw4w9WgXcQ" from youtube.com/watch?v=dQw4w9WgXcQ'>
+              <Input value={form.youtubeVideoId} onChange={e => set('youtubeVideoId', e.target.value)} placeholder="dQw4w9WgXcQ" />
+            </Field>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="File Size"><Input value={form.fileSize} onChange={e => set('fileSize', e.target.value)} placeholder="2.5 GB" /></Field>
+              <Field label="File Format"><Input value={form.fileFormat} onChange={e => set('fileFormat', e.target.value)} placeholder="ZIP, WAV" /></Field>
+            </div>
+            <Field label="Decay Curve"><Input value={form.decayCurve} onChange={e => set('decayCurve', e.target.value)} placeholder="Linear, Exponential, Logarithmic" /></Field>
+            <Field label="Modes"><Input value={form.modes} onChange={e => set('modes', e.target.value)} placeholder="Major and Minor, All 12 semitones" /></Field>
+            <Field label="Algorithmic Variations (per tone)"><Input value={form.algorithmicVariations} onChange={e => set('algorithmicVariations', e.target.value)} placeholder="Wide, Reverse, MS, Oct" /></Field>
+            <Field label="Total Files"><Input value={form.totalFiles} onChange={e => set('totalFiles', e.target.value)} placeholder="3,456 Impulse Response files" /></Field>
           </Card>
           <Card className="p-5 space-y-4">
             <p className="font-mono text-xs text-slate-500 uppercase tracking-wider">Hierarchy</p>
@@ -456,7 +484,7 @@ function ProductsPanel({ onToast }) {
     setLoading(true)
     try {
       const [p, c, cat, sub] = await Promise.all([
-        sanityRead(`*[_type == "product"] | order(collection->order asc, order asc) { _id, name, slug, productCode, price, percentage, lemonsqueezyVariantId, fileUrl, image, previewImages, collection->{ _id, name, slug, emoji }, category->{ _id, name, slug, collection->{ _id } }, subpack->{ _id, name, slug, category->{ _id } } }`),
+        sanityRead(`*[_type == "product"] | order(collection->order asc, order asc) { _id, name, slug, productCode, price, percentage, lemonsqueezyVariantId, fileUrl, image, previewImages, youtubeVideoId, fileSize, fileFormat, decayCurve, modes, algorithmicVariations, totalFiles, collection->{ _id, name, slug, emoji }, category->{ _id, name, slug, collection->{ _id } }, subpack->{ _id, name, slug, category->{ _id } } }`),
         sanityRead(`*[_type == "collection"] | order(order asc) { _id, name, slug, emoji, order }`),
         sanityRead(`*[_type == "category"] | order(order asc) { _id, name, slug, collection->{ _id, name } }`),
         sanityRead(`*[_type == "subpack"] | order(order asc) { _id, name, slug, category->{ _id, name } }`),
