@@ -44,6 +44,18 @@ export async function POST(request) {
 
       console.log("Products to email:", products);
 
+      console.log(
+        "Raw custom data:",
+        orderData.attributes.first_order_item?.custom,
+      );
+      console.log("Parsed products:", products);
+      console.log("Email payload:", {
+        customerEmail,
+        customerName,
+        products,
+        orderTotal,
+      });
+
       // Send download email
       await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/send-email`, {
         method: "POST",
