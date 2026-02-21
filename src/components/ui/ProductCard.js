@@ -23,10 +23,10 @@ export default function ProductCard({ product }) {
   const handleAddToCart = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     // Check if item already exists in cart
-    const existingItem = cart.find(item => item._id === product._id);
-    
+    const existingItem = cart.find((item) => item._id === product._id);
+
     if (existingItem) {
       // Show confirmation modal
       setShowConfirm(true);
@@ -96,7 +96,7 @@ export default function ProductCard({ product }) {
               <span className="font-space-mono text-xl font-bold text-white">
                 ${price}
               </span>
-              <button 
+              <button
                 onClick={handleAddToCart}
                 className="bg-cyan-500 hover:bg-cyan-400 text-black px-3 py-1.5 rounded-full text-[10px] font-bold uppercase transition-colors"
               >
@@ -120,11 +120,11 @@ export default function ProductCard({ product }) {
 
       {/* Confirmation Modal (Item Already Exists) */}
       {showConfirm && (
-        <div 
+        <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
           onClick={cancelAdd}
         >
-          <div 
+          <div
             className="bg-deep-bg border border-white/10 rounded-xl p-6 max-w-md w-full"
             onClick={(e) => e.stopPropagation()}
           >
@@ -132,8 +132,8 @@ export default function ProductCard({ product }) {
               Item Already in Cart
             </h3>
             <p className="text-slate-400 mb-6">
-              <span className="text-white font-bold">{name}</span> is already in your cart. 
-              Do you want to increase the quantity?
+              <span className="text-white font-bold">{name}</span> is already in
+              your cart. Do you want to increase the quantity?
             </p>
             <div className="flex gap-3">
               <button
@@ -155,25 +155,36 @@ export default function ProductCard({ product }) {
 
       {/* Success Modal */}
       {showSuccess && (
-        <div 
+        <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
           onClick={closeSuccess}
         >
-          <div 
+          <div
             className="bg-deep-bg border border-white/10 rounded-xl p-6 max-w-md w-full"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="text-center mb-4">
               <div className="w-16 h-16 bg-cyan-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                <svg
+                  className="w-8 h-8 text-cyan-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
               </div>
               <h3 className="font-space-grotesk text-xl font-bold mb-2">
                 Item Added to Cart
               </h3>
               <p className="text-slate-400">
-                <span className="text-white font-bold">{name}</span> has been added to your cart.
+                <span className="text-white font-bold">{name}</span> has been
+                added to your cart.
               </p>
             </div>
             <button

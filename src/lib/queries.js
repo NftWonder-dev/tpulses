@@ -38,6 +38,8 @@ export const COLLECTION_BY_SLUG_QUERY = `*[_type == "collection" && slug.current
     image,
     previewImages,
     order,
+    lemonsqueezyVariantId,  // ← ADD THIS LINE
+  fileUrl,                // ← ADD THIS LINE
     collection->{
       _id,
       name,
@@ -78,6 +80,8 @@ export const CATEGORY_BY_SLUG_QUERY = `*[_type == "category" && slug.current == 
     image,
     previewImages,
     order,
+     lemonsqueezyVariantId,  // ← ADD THIS LINE
+  fileUrl,    
     collection->{
       _id,
       name,
@@ -114,6 +118,8 @@ export const SUBPACK_BY_SLUG_QUERY = `*[_type == "subpack" && slug.current == $s
     image,
     previewImages,
     order,
+     lemonsqueezyVariantId,  // ← ADD THIS LINE
+  fileUrl,    
     collection->{
       _id,
       name,
@@ -171,6 +177,8 @@ export const ALL_PRODUCTS_QUERY = `*[_type == "product"] | order(collection->ord
   description,
   image,
   previewImages,
+   lemonsqueezyVariantId,  // ← ADD THIS LINE
+  fileUrl,    
   collection->{
     _id,
     name,
@@ -193,6 +201,8 @@ export const FEATURED_PRODUCTS_QUERY = `*[_type == "product" && featured == true
   price,
   image,
   previewImages,
+   lemonsqueezyVariantId,  // ← ADD THIS LINE
+  fileUrl,    
   collection->{
     name,
     slug
