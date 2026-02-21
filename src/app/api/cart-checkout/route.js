@@ -60,8 +60,8 @@ export async function POST(request) {
           },
           checkout_data: {
             email: customerEmail || undefined,
-            custom: customData,
           },
+          custom: customData,
         },
         relationships: {
           store: {
