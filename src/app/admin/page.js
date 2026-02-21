@@ -162,19 +162,13 @@ function Sidebar({ active, onNav }) {
 // ─── Sanity helpers ────────────────────────────────────────────────────────
 
 async function sanityFetch(query, params = {}) {
-  const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || 'ji82q30h'
-  const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET || 'production'
-  const apiVersion = '2024-01-01'
-
-  const q = encodeURIComponent(query)
-  const p = Object.keys(params).length
-    ? '&' + Object.entries(params)
-        .map(([k, v]) => `$${k}=${encodeURIComponent(JSON.stringify(v))}`)
-        .join('&')
-    : ''
-
-  const url = `https://${projectId}.api.sanity.io/v${apiVersion}/data/query/${dataset}?query=${q}${p}`
-  const res = await fetch(url)
+  // Routes through /api/admin/sanity to avoid browser CORS issues
+  const res = await fetch('/api/admin/sanity', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query, params }),
+  })
+  if (!res.ok) throw new Error(`Sanity proxy error: ${res.status}`)
   const data = await res.json()
   return data.result
 }
