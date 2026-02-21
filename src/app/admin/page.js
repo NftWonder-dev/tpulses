@@ -98,16 +98,16 @@ function S3Uploader({ value, onChange, productSlug }) {
     try {
       const slug = productSlug || uid()
       const key = `products/${slug}/${file.name}`
-      const urlRes = await fetch(`/api/admin/s3-upload?key=${encodeURIComponent(key)}&contentType=${encodeURIComponent(file.type || 'application/zip')}`)
-      const { url } = await urlRes.json()
-      if (!url) throw new Error('No presigned URL returned')
-      await new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest()
-        xhr.upload.onprogress = e => { if (e.lengthComputable) setProgress(Math.round((e.loaded / e.total) * 100)) }
-        xhr.onload = () => xhr.status === 200 ? resolve() : reject(new Error(`Upload failed: ${xhr.status}`))
-        xhr.onerror = () => reject(new Error('Upload error'))
-        xhr.open('PUT', url); xhr.setRequestHeader('Content-Type', file.type || 'application/zip'); xhr.send(file)
-      })
+      // Upload through server to avoid S3 CORS issues
+      const fd = new FormData()
+      fd.append('file', file)
+      fd.append('key', key)
+      // Simulate progress since we can't track server-side upload
+      const progressInterval = setInterval(() => setProgress(p => Math.min(p + 10, 85)), 300)
+      const res = await fetch('/api/admin/s3-upload', { method: 'POST', body: fd })
+      clearInterval(progressInterval)
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Upload failed')
       onChange(key); setProgress(100)
     } catch (e) { alert('S3 upload failed: ' + e.message) }
     finally { setUploading(false) }
@@ -346,7 +346,7 @@ function ProductForm({ product, collections, categories, subpacks, onSave, onCan
       if (form.productCode) doc.productCode = form.productCode
       if (form.price) doc.price = parseFloat(form.price)
       if (form.description?.length) doc.description = form.description
-      if (form.percentage) doc.percentage = parseFloat(form.percentage)
+      if (form.percentage) doc.percentage = String(form.percentage)
       if (form.fileUrl) doc.fileUrl = form.fileUrl
       if (form.lemonsqueezyVariantId) doc.lemonsqueezyVariantId = form.lemonsqueezyVariantId
       if (form.image) doc.image = form.image
