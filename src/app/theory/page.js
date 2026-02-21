@@ -40,7 +40,7 @@ export default function TheoryPage() {
           <div className="max-w-4xl mx-auto space-y-12">
             <div>
               <h2 className="font-space-grotesk text-3xl font-bold mb-4 flex items-center gap-3">
-                <span className="text-magenta-400">01</span>
+                <span className="text-cyan-400">01</span>
                 Harmonic Integration: Turning Reverb into Music
               </h2>
               <p className="text-slate-400 text-lg leading-relaxed mb-6">
