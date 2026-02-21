@@ -126,7 +126,63 @@ function S3Uploader({ value, onChange, productSlug }) {
   )
 }
 
-const EMPTY = { name: '', slug: '', productCode: '', price: '', description: '', percentage: '', fileUrl: '', lemonsqueezyVariantId: '', lsProductId: '', collectionId: '', categoryId: '', subpackId: '', image: null }
+
+function PreviewImagesUploader({ value = [], onChange }) {
+  const [uploading, setUploading] = useState(false)
+  const ref = useRef()
+  const PROJECT_ID = 'ji82q30h'
+
+  async function handleFiles(files) {
+    if (!files?.length) return
+    setUploading(true)
+    try {
+      const uploaded = []
+      for (const file of Array.from(files)) {
+        const fd = new FormData(); fd.append('file', file)
+        const res = await fetch('/api/admin/sanity-asset', { method: 'POST', body: fd })
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error)
+        uploaded.push(data.ref)
+      }
+      onChange([...(value || []), ...uploaded])
+    } catch (e) { alert('Preview upload failed: ' + e.message) }
+    finally { setUploading(false) }
+  }
+
+  function remove(idx) { onChange(value.filter((_, i) => i !== idx)) }
+
+  function getUrl(img) {
+    if (!img?.asset?._ref) return null
+    return `https://cdn.sanity.io/images/${PROJECT_ID}/production/${img.asset._ref.replace('image-', '').replace(/-([a-z]+)$/, '.$1')}`
+  }
+
+  return (
+    <Field label="Preview Images" hint="Multiple images shown in product gallery">
+      <div className="grid grid-cols-3 gap-2 mb-2">
+        {(value || []).map((img, i) => {
+          const url = getUrl(img)
+          return url ? (
+            <div key={i} className="relative group rounded-lg overflow-hidden border border-white/10">
+              <img src={url} alt="" className="w-full h-20 object-cover" />
+              <button onClick={() => remove(i)} className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:text-red-300">
+                <X size={10} />
+              </button>
+            </div>
+          ) : null
+        })}
+        <div
+          onClick={() => ref.current?.click()}
+          className="border border-dashed border-white/15 rounded-lg h-20 flex items-center justify-center cursor-pointer hover:border-cyan-500/40 transition-colors text-slate-600"
+        >
+          {uploading ? <Spinner size={14} /> : <Plus size={18} />}
+        </div>
+      </div>
+      <input ref={ref} type="file" accept="image/*" multiple className="hidden" onChange={e => handleFiles(e.target.files)} />
+    </Field>
+  )
+}
+
+const EMPTY = { name: '', slug: '', productCode: '', price: '', description: '', percentage: '', fileUrl: '', lemonsqueezyVariantId: '', collectionId: '', categoryId: '', subpackId: '', image: null, previewImages: [] }
 
 function ProductForm({ product, collections, categories, subpacks, onSave, onCancel, onToast }) {
   const isEdit = !!product?._id
@@ -134,26 +190,12 @@ function ProductForm({ product, collections, categories, subpacks, onSave, onCan
     name: product.name || '', slug: product.slug?.current || '', productCode: product.productCode || '',
     price: product.price || '', description: product.description || '', percentage: product.percentage || '',
     fileUrl: product.fileUrl || '', lemonsqueezyVariantId: product.lemonsqueezyVariantId || '',
-    lsProductId: product.lsProductId || '', collectionId: product.collection?._id || '',
+    collectionId: product.collection?._id || '',
     categoryId: product.category?._id || '', subpackId: product.subpack?._id || '', image: product.image || null,
   } : { ...EMPTY })
   const [saving, setSaving] = useState(false)
-  const [creatingLS, setCreatingLS] = useState(false)
   function set(k, v) { setForm(f => ({ ...f, [k]: v })) }
   function handleName(v) { set('name', v); if (!isEdit) set('slug', slugify(v)) }
-
-  async function createLSVariant() {
-    if (!form.name || !form.price) { onToast('Enter name and price first', 'error'); return }
-    setCreatingLS(true)
-    try {
-      const res = await fetch('/api/admin/lemonsqueezy-variant', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: form.name, price: form.price, description: form.description }) })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error)
-      set('lemonsqueezyVariantId', data.variantId); set('lsProductId', data.productId)
-      onToast(`LemonSqueezy variant ${data.variantId} created!`, 'success')
-    } catch (e) { onToast('LS error: ' + e.message, 'error') }
-    finally { setCreatingLS(false) }
-  }
 
   async function handleSave() {
     if (!form.name || !form.slug) { onToast('Name and slug required', 'error'); return }
@@ -166,8 +208,8 @@ function ProductForm({ product, collections, categories, subpacks, onSave, onCan
       if (form.percentage) doc.percentage = parseFloat(form.percentage)
       if (form.fileUrl) doc.fileUrl = form.fileUrl
       if (form.lemonsqueezyVariantId) doc.lemonsqueezyVariantId = form.lemonsqueezyVariantId
-      if (form.lsProductId) doc.lsProductId = form.lsProductId
       if (form.image) doc.image = form.image
+      if (form.previewImages?.length) doc.previewImages = form.previewImages
       if (form.collectionId) doc.collection = { _type: 'reference', _ref: form.collectionId }
       if (form.categoryId) doc.category = { _type: 'reference', _ref: form.categoryId }
       if (form.subpackId) doc.subpack = { _type: 'reference', _ref: form.subpackId }
@@ -231,17 +273,21 @@ function ProductForm({ product, collections, categories, subpacks, onSave, onCan
           <Card className="p-5 space-y-4">
             <p className="font-mono text-xs text-slate-500 uppercase tracking-wider">Pricing & LemonSqueezy</p>
             <Field label="Price (€) *"><Input type="number" step="0.01" value={form.price} onChange={e => set('price', e.target.value)} placeholder="10.00" /></Field>
-            <Field label="LemonSqueezy Variant ID"><Input value={form.lemonsqueezyVariantId} onChange={e => set('lemonsqueezyVariantId', e.target.value)} placeholder="Will be auto-filled" /></Field>
-            {!form.lemonsqueezyVariantId
-              ? <Btn variant="primary" loading={creatingLS} onClick={createLSVariant} className="w-full justify-center"><Zap size={13} />Create LemonSqueezy Variant</Btn>
-              : <div className="flex items-center gap-2 text-emerald-400 text-xs font-mono"><CheckCircle size={13} />Variant {form.lemonsqueezyVariantId} linked</div>}
+            <Field label="LemonSqueezy Variant ID" hint="Create the product in LemonSqueezy first, then paste the Variant ID here">
+              <Input value={form.lemonsqueezyVariantId} onChange={e => set('lemonsqueezyVariantId', e.target.value)} placeholder="e.g. 123456" />
+            </Field>
+            {form.lemonsqueezyVariantId && <div className="flex items-center gap-2 text-emerald-400 text-xs font-mono"><CheckCircle size={13} />Variant {form.lemonsqueezyVariantId} linked</div>}
+            <a href="https://app.lemonsqueezy.com/products" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-xs font-mono text-slate-500 hover:text-cyan-400 transition-colors"><Link2 size={11} />Open LemonSqueezy to get Variant ID</a>
           </Card>
           <Card className="p-5 space-y-4">
             <p className="font-mono text-xs text-slate-500 uppercase tracking-wider">Product File</p>
             <S3Uploader value={form.fileUrl} onChange={v => set('fileUrl', v)} productSlug={form.slug} />
             {form.fileUrl && <Field label="S3 Path"><Input value={form.fileUrl} onChange={e => set('fileUrl', e.target.value)} /></Field>}
           </Card>
-          <Card className="p-5"><ImageUploader value={form.image} onChange={v => set('image', v)} /></Card>
+          <Card className="p-5 space-y-4">
+            <ImageUploader value={form.image} onChange={v => set('image', v)} />
+            <PreviewImagesUploader value={form.previewImages} onChange={v => set('previewImages', v)} />
+          </Card>
         </div>
       </div>
       <div className="flex justify-end gap-3 pt-2">
@@ -266,7 +312,7 @@ function ProductsPanel({ onToast }) {
     setLoading(true)
     try {
       const [p, c, cat, sub] = await Promise.all([
-        sanityRead(`*[_type == "product"] | order(collection->order asc, order asc) { _id, name, slug, productCode, price, percentage, lemonsqueezyVariantId, lsProductId, fileUrl, image, collection->{ _id, name, slug, emoji }, category->{ _id, name, slug, collection->{ _id } }, subpack->{ _id, name, slug, category->{ _id } } }`),
+        sanityRead(`*[_type == "product"] | order(collection->order asc, order asc) { _id, name, slug, productCode, price, percentage, lemonsqueezyVariantId, fileUrl, image, previewImages, collection->{ _id, name, slug, emoji }, category->{ _id, name, slug, collection->{ _id } }, subpack->{ _id, name, slug, category->{ _id } } }`),
         sanityRead(`*[_type == "collection"] | order(order asc) { _id, name, slug, emoji, order }`),
         sanityRead(`*[_type == "category"] | order(order asc) { _id, name, slug, collection->{ _id, name } }`),
         sanityRead(`*[_type == "subpack"] | order(order asc) { _id, name, slug, category->{ _id, name } }`),
@@ -281,7 +327,6 @@ function ProductsPanel({ onToast }) {
   async function handleDelete(p) {
     setConfirm(null)
     try {
-      if (p.lsProductId) await fetch('/api/admin/lemonsqueezy-variant', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ productId: p.lsProductId }) })
       await sanityWrite([{ delete: { id: p._id } }])
       onToast('Product deleted', 'success'); load()
     } catch (e) { onToast('Delete failed: ' + e.message, 'error') }
