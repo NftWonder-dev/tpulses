@@ -23,7 +23,7 @@ export const metadata = {
   title: "Trim Pulses - Musically Tuned Impulse Responses",
   description: "Musically Tuned Impulse Responses",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/favicon_logo.ico",
   },
 };
 
