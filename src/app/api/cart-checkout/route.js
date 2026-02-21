@@ -54,7 +54,7 @@ export async function POST(request) {
         type: "checkouts",
         attributes: {
           checkout_options: {
-            embed: false,
+            embed: true,
             media: false,
             logo: true,
           },
