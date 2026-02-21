@@ -3,34 +3,30 @@
 // and deliberately opts OUT of the Navigation/Footer/PasswordProtection
 // that wraps the public site.
 
-import { redirect } from 'next/navigation'
-import { cookies } from 'next/headers'
+import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 
 // Very simple cookie-based admin auth.
 // Set ADMIN_PASSWORD env var (defaults to "TrimAdmin2024" if not set).
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'TrimAdmin2024'
-const COOKIE_NAME = 'tp_admin_auth'
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "TrimAdmin2024";
+const COOKIE_NAME = "tp_admin_auth";
 
 export const metadata = {
-  title: 'Admin · Trim Pulses',
+  title: "Admin · Trim Pulses",
   robots: { index: false, follow: false },
-}
+};
 
 export default function AdminLayout({ children }) {
   // Check cookie server-side
-  const cookieStore = cookies()
-  const auth = cookieStore.get(COOKIE_NAME)
+  const cookieStore = cookies();
+  const auth = cookieStore.get(COOKIE_NAME);
 
   // If not authenticated, render the login page inline
   if (!auth || auth.value !== ADMIN_PASSWORD) {
-    return <AdminLogin />
+    return <AdminLogin />;
   }
 
-  return (
-    <div className="min-h-screen bg-[#0a0a12] text-white">
-      {children}
-    </div>
-  )
+  return <div className="min-h-screen bg-[#0a0a12] text-white">{children}</div>;
 }
 
 // ── Client-side login form ────────────────────────────────────────────────
@@ -128,5 +124,5 @@ function AdminLogin() {
         </div>
       </body>
     </html>
-  )
+  );
 }
