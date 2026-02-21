@@ -4,6 +4,7 @@ import { verifyWebhookSignature } from "@/lib/lemonsqueezy";
 
 export async function POST(request) {
   try {
+    console.log("Base URL:", process.env.NEXT_PUBLIC_BASE_URL);
     const rawBody = await request.text();
     const signature = request.headers.get("x-signature");
 
