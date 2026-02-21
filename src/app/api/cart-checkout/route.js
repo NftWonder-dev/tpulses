@@ -43,6 +43,12 @@ export async function POST(request) {
       }),
     ];
 
+    console.log("Custom data being sent:", customData);
+    console.log(
+      "Cart items:",
+      cartItems.map((i) => ({ name: i.name, fileUrl: i.fileUrl })),
+    );
+
     const requestBody = {
       data: {
         type: "checkouts",
