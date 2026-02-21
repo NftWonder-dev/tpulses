@@ -11,6 +11,12 @@ export default function PasswordProtection({ children }) {
 
   // Check if already authenticated on mount
   useEffect(() => {
+    // Skip password protection entirely for admin routes
+    if (window.location.pathname.startsWith("/admin")) {
+      setIsAuthenticated(true);
+      setIsLoading(false);
+      return;
+    }
     const auth = sessionStorage.getItem("siteAuthenticated");
     if (auth === "true") {
       setIsAuthenticated(true);
