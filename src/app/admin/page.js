@@ -506,7 +506,7 @@ function ProductsPanel({ onToast }) {
     setLoading(true)
     try {
       const [p, c, cat, sub] = await Promise.all([
-        sanityRead(`*[_type == "product"] | order(collection->order asc, order asc) { _id, name, slug, productCode, price, percentage, lemonsqueezyVariantId, fileUrl, image, previewImages, youtubeVideoId, fileSize, fileFormat, decayCurve, modes, algorithmicVariations, totalFiles, collection->{ _id, name, slug, emoji }, category->{ _id, name, slug, collection->{ _id } }, subpack->{ _id, name, slug, category->{ _id } } }`),
+        sanityRead(`*[_type == "product"] | order(_createdAt desc) { _id, name, slug, productCode, price, percentage, lemonsqueezyVariantId, fileUrl, image, previewImages, youtubeVideoId, fileSize, fileFormat, decayCurve, modes, algorithmicVariations, totalFiles, collection->{ _id, name, slug, emoji }, category->{ _id, name, slug, collection->{ _id } }, subpack->{ _id, name, slug, category->{ _id } } }`),
         sanityRead(`*[_type == "collection"] | order(order asc) { _id, name, slug, emoji, order }`),
         sanityRead(`*[_type == "category"] | order(order asc) { _id, name, slug, collection->{ _id, name } }`),
         sanityRead(`*[_type == "subpack"] | order(order asc) { _id, name, slug, category->{ _id, name } }`),
