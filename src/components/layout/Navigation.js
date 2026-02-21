@@ -45,7 +45,7 @@ export default function Navigation() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 cursor-pointer">
           <div className="w-6 h-6 bg-gradient-to-tr from-cyan-500 to-magenta-500 rounded-sm rotate-45 flex items-center justify-center">
-            <Activity className="w-6 h-6 text-white -rotate-45" />
+            <Activity className="w-5 h-5 text-white -rotate-45" />
           </div>
           <span className="font-space-grotesk font-bold text-xl tracking-tighter uppercase">
             TRIM Pulses
