@@ -21,7 +21,7 @@ export async function GET(request) {
     const url = new URL('https://api.lemonsqueezy.com/v1/orders')
     url.searchParams.set('page[number]', page)
     url.searchParams.set('page[size]', perPage)
-    url.searchParams.set('sort', '-created_at')
+    // sort not supported by LS API v1
     if (storeId) url.searchParams.set('filter[store_id]', storeId)
 
     const res = await fetch(url.toString(), {
