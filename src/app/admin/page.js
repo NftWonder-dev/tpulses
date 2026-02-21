@@ -142,7 +142,7 @@ function PreviewImagesUploader({ value = [], onChange }) {
         const res = await fetch('/api/admin/sanity-asset', { method: 'POST', body: fd })
         const data = await res.json()
         if (!res.ok) throw new Error(data.error)
-        uploaded.push(data.ref)
+        uploaded.push({ ...data.ref, _key: uid() })
       }
       onChange([...(value || []), ...uploaded])
     } catch (e) { alert('Preview upload failed: ' + e.message) }
@@ -190,6 +190,9 @@ function ProductForm({ product, collections, categories, subpacks, onSave, onCan
     name: product.name || '', slug: product.slug?.current || '', productCode: product.productCode || '',
     price: product.price || '', description: product.description || '', percentage: product.percentage || '',
     fileUrl: product.fileUrl || '', lemonsqueezyVariantId: product.lemonsqueezyVariantId || '',
+    description: Array.isArray(product.description)
+      ? product.description.map(b => b.children?.map(c => c.text).join('')).join('\n')
+      : (product.description || ''),
     collectionId: product.collection?._id || '',
     categoryId: product.category?._id || '', subpackId: product.subpack?._id || '', image: product.image || null,
   } : { ...EMPTY })
@@ -204,12 +207,23 @@ function ProductForm({ product, collections, categories, subpacks, onSave, onCan
       const doc = { _type: 'product', name: form.name, slug: { _type: 'slug', current: form.slug } }
       if (form.productCode) doc.productCode = form.productCode
       if (form.price) doc.price = parseFloat(form.price)
-      if (form.description) doc.description = form.description
+      if (form.description) doc.description = [
+        {
+          _type: 'block',
+          _key: uid(),
+          style: 'normal',
+          markDefs: [],
+          children: [{ _type: 'span', _key: uid(), text: form.description, marks: [] }]
+        }
+      ]
       if (form.percentage) doc.percentage = parseFloat(form.percentage)
       if (form.fileUrl) doc.fileUrl = form.fileUrl
       if (form.lemonsqueezyVariantId) doc.lemonsqueezyVariantId = form.lemonsqueezyVariantId
       if (form.image) doc.image = form.image
-      if (form.previewImages?.length) doc.previewImages = form.previewImages
+      if (form.previewImages?.length) doc.previewImages = form.previewImages.map(img => ({
+        ...img,
+        _key: img._key || uid(),
+      }))
       if (form.collectionId) doc.collection = { _type: 'reference', _ref: form.collectionId }
       if (form.categoryId) doc.category = { _type: 'reference', _ref: form.categoryId }
       if (form.subpackId) doc.subpack = { _type: 'reference', _ref: form.subpackId }
@@ -383,7 +397,15 @@ function HierarchyForm({ type, item, parents, onSave, onCancel, onToast }) {
       const slug = form.slug || slugify(form.name)
       const doc = { _type: type, name: form.name, slug: { _type: 'slug', current: slug } }
       if (form.emoji) doc.emoji = form.emoji
-      if (form.description) doc.description = form.description
+      if (form.description) doc.description = [
+        {
+          _type: 'block',
+          _key: uid(),
+          style: 'normal',
+          markDefs: [],
+          children: [{ _type: 'span', _key: uid(), text: form.description, marks: [] }]
+        }
+      ]
       if (form.order !== '') doc.order = parseInt(form.order)
       if (type === 'category' && form.parentId) doc.collection = { _type: 'reference', _ref: form.parentId }
       if (type === 'subpack' && form.parentId) doc.category = { _type: 'reference', _ref: form.parentId }
