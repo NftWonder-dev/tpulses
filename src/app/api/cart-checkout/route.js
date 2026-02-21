@@ -60,7 +60,10 @@ export async function POST(request) {
           },
           checkout_data: {
             email: customerEmail || undefined,
-            custom: customData,
+            custom_price: undefined,
+          },
+          product_options: {
+            redirect_url: "https://trimpulses.com/order-success",
           },
         },
         relationships: {
