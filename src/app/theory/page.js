@@ -221,7 +221,7 @@ export default function TheoryPage() {
             {/* Card 1 */}
 
             <div className="glass-card p-8 rounded-xl text-center">
-              <div className="text-4xl font-bold text-cyan-400 mb-4 font-space-mono">
+              <div className="text-3xl font-bold text-white mb-4 font-space-mono">
                 λ = v / f
               </div>
               <h3 className="font-space-grotesk text-xl font-bold mb-2">
@@ -235,7 +235,7 @@ export default function TheoryPage() {
 
             {/* Card 2 */}
             <div className="glass-card p-8 rounded-xl text-center">
-              <div className="text-4xl font-bold text-magenta-400 mb-4 font-space-mono">
+              <div className="text-3xl font-bold text-white mb-4 font-space-mono">
                 ♬ ♩ ♪ ♫
               </div>
               <h3 className="font-space-grotesk text-xl font-bold mb-2">
@@ -249,7 +249,7 @@ export default function TheoryPage() {
 
             {/* Card 3 */}
             <div className="glass-card p-8 rounded-xl text-center">
-              <div className="text-4xl font-bold text-cyan-400 mb-4 font-space-mono">
+              <div className="text-3xl font-bold text-white mb-4 font-space-mono">
                 ∿ Ξ ∞ 〰
               </div>
               <h3 className="font-space-grotesk text-xl font-bold mb-2">
@@ -263,7 +263,7 @@ export default function TheoryPage() {
 
             {/* Card 4 */}
             <div className="glass-card p-8 rounded-xl text-center">
-              <div className="text-4xl font-bold text-cyan-400 mb-4 font-space-mono">
+              <div className="text-3xl font-bold text-white mb-4 font-space-mono">
                 ⌬ ⫗ ⬡
               </div>
               <h3 className="font-space-grotesk text-xl font-bold mb-2">
@@ -277,7 +277,7 @@ export default function TheoryPage() {
 
             {/* Card 5 */}
             <div className="glass-card p-8 rounded-xl text-center">
-              <div className="text-4xl font-bold text-cyan-400 mb-4 font-space-mono">
+              <div className="text-3xl font-bold text-white mb-4 font-space-mono">
                 ⟡ ◎ ▽
               </div>
               <h3 className="font-space-grotesk text-xl font-bold mb-2">
@@ -291,7 +291,7 @@ export default function TheoryPage() {
 
             {/* Card 6 */}
             <div className="glass-card p-8 rounded-xl text-center">
-              <div className="text-4xl font-bold text-cyan-400 mb-4 font-space-mono">
+              <div className="text-3xl font-bold text-white mb-4 font-space-mono">
                 ◱ ⚯ ◲
               </div>
               <h3 className="font-space-grotesk text-xl font-bold mb-2">
