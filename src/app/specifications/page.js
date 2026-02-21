@@ -228,9 +228,8 @@ export default function SpecificationsPage() {
                 <li className="flex items-start gap-3">
                   <span className="text-cyan-400 mt-1">•</span>
                   <span>
-                    <strong className="text-white">SUS4</strong> - Additional
-                    suspended fourth variation for specific harmonic
-                    applications
+                    <strong className="text-white">DIRECT</strong> - Pure direct
+                    signal path for precise, articulate sound placement
                   </span>
                 </li>
               </ul>
