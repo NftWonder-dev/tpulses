@@ -2096,16 +2096,16 @@ export default function AdminDashboard() {
       <aside className="w-56 shrink-0 h-screen sticky top-0 flex flex-col border-r border-white/5 bg-[#07070f]">
         <div className="px-5 py-6 border-b border-white/5">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 flex items-center justify-center">
+            <div className="w-8 h-8 flex items-center justify-center">
               <div
-                className="w-6 h-6 bg-gradient-to-r from-cyan-400 to-fuchsia-500 rounded-sm flex items-center justify-center"
+                className="w-8 h-8 bg-gradient-to-r from-cyan-400 to-fuchsia-500 rounded-sm flex items-center justify-center"
                 style={{
                   clipPath: "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)",
                 }}
               >
                 <svg
-                  width="14"
-                  height="14"
+                  width="16"
+                  height="16"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="white"
