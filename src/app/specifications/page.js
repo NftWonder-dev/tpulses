@@ -385,13 +385,15 @@ export default function SpecificationsPage() {
             Explore Our Collections
           </h2>
           <p className="text-slate-400 text-xl mb-12 max-w-2xl mx-auto">
-            Discover our range of musically-tuned impulse response collections,
-            each meticulously crafted for professional audio production
+            Each collection represents a different approach to harmonic sequence
+            control of sources, from natural acoustic elements to algorithmic
+            noise profiles. All IRs are harmonically tuned to ensure your reverb
+            is not just heard, but felt as a musical extension of your sound.
           </p>
 
           <Link
             href="/collections"
-            className="inline-block bg-white text-black px-12 py-5 rounded-full font-bold uppercase tracking-widest hover:bg-cyan-400 transition-all text-lg"
+            className="inline-block bg-cyan-500 hover:bg-cyan-400 text-black px-8 py-4 rounded-full font-bold uppercase text-sm transition-all"
           >
             View All Collections
           </Link>
