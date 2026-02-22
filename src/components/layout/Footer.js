@@ -72,7 +72,10 @@ export default function Footer() {
               </a>
             </li>
             <li>
-              <a href="#" className="hover:text-cyan-400 transition-colors">
+              <a
+                href="/specifications"
+                className="hover:text-cyan-400 transition-colors"
+              >
                 IR Guide
               </a>
             </li>
