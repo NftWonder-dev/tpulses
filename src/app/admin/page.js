@@ -2097,7 +2097,12 @@ export default function AdminDashboard() {
         <div className="px-5 py-6 border-b border-white/5">
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 flex items-center justify-center">
-              <div className="w-5 h-5 bg-gradient-to-r from-cyan-400 to-fuchsia-500 rotate-45 rounded-sm flex items-center justify-center">
+              <div
+                className="w-6 h-6 bg-gradient-to-r from-cyan-400 to-fuchsia-500 rounded-sm flex items-center justify-center"
+                style={{
+                  clipPath: "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)",
+                }}
+              >
                 <svg
                   width="14"
                   height="14"
@@ -2107,7 +2112,6 @@ export default function AdminDashboard() {
                   strokeWidth="2.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="-rotate-45"
                 >
                   <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
                 </svg>
