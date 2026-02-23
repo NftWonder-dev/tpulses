@@ -213,13 +213,14 @@ function RichTextEditor({ value = [], onChange }) {
     if (ref.current) onChange(htmlToBlocks(ref.current.innerHTML))
   }
 
-  // Initialise HTML from blocks on first render
+  // Initialise HTML — runs whenever value first becomes non-empty (handles async edit load)
+  const initialised = useRef(false)
   useEffect(() => {
-    if (ref.current && value?.length) {
-      const html = blocksToHtml(value)
-      if (ref.current.innerHTML !== html) ref.current.innerHTML = html
+    if (ref.current && value?.length && !initialised.current) {
+      ref.current.innerHTML = blocksToHtml(value)
+      initialised.current = true
     }
-  }, []) // only on mount
+  }, [value])
 
   const btnClass = "px-2 py-1 rounded text-slate-400 hover:bg-white/10 hover:text-white transition-colors font-mono text-xs"
 
