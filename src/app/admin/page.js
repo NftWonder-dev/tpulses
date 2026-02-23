@@ -359,10 +359,14 @@ const EMPTY = { name: '', slug: '', productCode: '', price: '', description: [],
 function ProductForm({ product, collections, categories, subpacks, onSave, onCancel, onToast }) {
   const isEdit = !!product?._id
   const [form, setForm] = useState(isEdit ? {
-    name: product.name || '', slug: product.slug?.current || '', productCode: product.productCode || '',
-    price: product.price || '', description: product.description || '', percentage: product.percentage || '',
-    fileUrl: product.fileUrl || '', lemonsqueezyVariantId: product.lemonsqueezyVariantId || '',
-    description: product.description || [],
+    name: product.name || '',
+    slug: product.slug?.current || '',
+    productCode: product.productCode || '',
+    price: product.price || '',
+    description: Array.isArray(product.description) ? product.description : [],
+    percentage: product.percentage || '',
+    fileUrl: product.fileUrl || '',
+    lemonsqueezyVariantId: product.lemonsqueezyVariantId || '',
     youtubeVideoId: product.youtubeVideoId || '',
     fileSize: product.fileSize || '',
     fileFormat: product.fileFormat || '',
@@ -371,7 +375,10 @@ function ProductForm({ product, collections, categories, subpacks, onSave, onCan
     algorithmicVariations: product.algorithmicVariations || '',
     totalFiles: product.totalFiles || '',
     collectionId: product.collection?._id || '',
-    categoryId: product.category?._id || '', subpackId: product.subpack?._id || '', image: product.image || null,
+    categoryId: product.category?._id || '',
+    subpackId: product.subpack?._id || '',
+    image: product.image || null,
+    previewImages: Array.isArray(product.previewImages) ? product.previewImages : [],
   } : { ...EMPTY })
   const [saving, setSaving] = useState(null) // null | 'draft' | 'publish'
   function set(k, v) { setForm(f => ({ ...f, [k]: v })) }
@@ -538,7 +545,7 @@ function ProductsPanel({ onToast }) {
     setLoading(true)
     try {
       const [p, c, cat, sub] = await Promise.all([
-        sanityRead(`*[_type == "product"] | order(_createdAt desc) { _id, name, slug, productCode, price, percentage, lemonsqueezyVariantId, fileUrl, image, previewImages, youtubeVideoId, fileSize, fileFormat, decayCurve, modes, algorithmicVariations, totalFiles, collection->{ _id, name, slug, emoji }, category->{ _id, name, slug, collection->{ _id } }, subpack->{ _id, name, slug, category->{ _id } } }`),
+        sanityRead(`*[_type == "product"] | order(_createdAt desc) { _id, name, slug, productCode, price, percentage, lemonsqueezyVariantId, fileUrl, image, previewImages, description, youtubeVideoId, fileSize, fileFormat, decayCurve, modes, algorithmicVariations, totalFiles, collection->{ _id, name, slug, emoji }, category->{ _id, name, slug, collection->{ _id } }, subpack->{ _id, name, slug, category->{ _id } } }`),
         sanityRead(`*[_type == "collection"] | order(order asc) { _id, name, slug, emoji, order }`),
         sanityRead(`*[_type == "category"] | order(order asc) { _id, name, slug, collection->{ _id, name } }`),
         sanityRead(`*[_type == "subpack"] | order(order asc) { _id, name, slug, category->{ _id, name } }`),
