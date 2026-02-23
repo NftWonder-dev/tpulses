@@ -131,90 +131,106 @@ function S3Uploader({ value, onChange, productSlug }) {
 
 function RichTextEditor({ value = [], onChange }) {
   const ref = useRef()
+  const initialised = useRef(false)
 
-  // Convert Portable Text blocks to HTML for display
   function blocksToHtml(blocks) {
     if (!blocks?.length) return ''
     return blocks.map(block => {
       if (block._type !== 'block') return ''
-      const text = (block.children || []).map(span => {
-        let t = span.text || ''
+      const inline = (block.children || []).map(span => {
+        let t = (span.text || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
         if (span.marks?.includes('strong')) t = `<strong>${t}</strong>`
         if (span.marks?.includes('em')) t = `<em>${t}</em>`
         if (span.marks?.includes('code')) t = `<code>${t}</code>`
         return t
       }).join('')
       const style = block.style || 'normal'
-      if (style === 'h2') return `<h2>${text}</h2>`
-      if (style === 'h3') return `<h3>${text}</h3>`
-      if (style === 'blockquote') return `<blockquote>${text}</blockquote>`
-      return `<p>${text || '<br>'}</p>`
+      if (style === 'h2') return `<h2>${inline}</h2>`
+      if (style === 'h3') return `<h3>${inline}</h3>`
+      if (style === 'blockquote') return `<blockquote>${inline}</blockquote>`
+      if (block.listItem === 'bullet') return `<li data-list="bullet">${inline}</li>`
+      if (block.listItem === 'number') return `<li data-list="number">${inline}</li>`
+      return `<p>${inline || '<br>'}</p>`
+    }).reduce((acc, item) => {
+      // Wrap consecutive list items in ul/ol
+      if (item.startsWith('<li data-list="bullet">')) {
+        const li = item.replace('<li data-list="bullet">', '<li>')
+        const last = acc[acc.length - 1]
+        if (last?.startsWith('<ul>') && !last.endsWith('</ul>')) return [...acc.slice(0,-1), last + li]
+        if (last?.endsWith('</ul>') === false && last?.includes('<ul>')) return [...acc.slice(0,-1), last + li]
+        // check if last is an open ul
+        if (typeof last === 'string' && last.startsWith('<ul>') && !last.endsWith('</ul>')) return [...acc.slice(0,-1), last + li]
+        return [...acc, `<ul>${li}`]
+      }
+      if (item.startsWith('<li data-list="number">')) {
+        const li = item.replace('<li data-list="number">', '<li>')
+        const last = acc[acc.length - 1]
+        if (typeof last === 'string' && last.startsWith('<ol>') && !last.endsWith('</ol>')) return [...acc.slice(0,-1), last + li]
+        return [...acc, `<ol>${li}`]
+      }
+      // Close any open list
+      const last = acc[acc.length - 1]
+      if (typeof last === 'string' && last.startsWith('<ul>') && !last.endsWith('</ul>')) return [...acc.slice(0,-1), last + '</ul>', item]
+      if (typeof last === 'string' && last.startsWith('<ol>') && !last.endsWith('</ol>')) return [...acc.slice(0,-1), last + '</ol>', item]
+      return [...acc, item]
+    }, []).map(item => {
+      if (item.startsWith('<ul>') && !item.endsWith('</ul>')) return item + '</ul>'
+      if (item.startsWith('<ol>') && !item.endsWith('</ol>')) return item + '</ol>'
+      return item
     }).join('')
   }
 
-  // Convert contentEditable innerHTML back to Portable Text blocks
   function htmlToBlocks(html) {
     const div = document.createElement('div')
     div.innerHTML = html
     const blocks = []
-    div.childNodes.forEach(node => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        if (node.textContent.trim()) {
-          blocks.push({ _type: 'block', _key: uid(), style: 'normal', markDefs: [], children: [{ _type: 'span', _key: uid(), text: node.textContent, marks: [] }] })
-        }
-        return
-      }
-      const tag = node.tagName?.toLowerCase()
-      let style = 'normal'
-      if (tag === 'h2') style = 'h2'
-      if (tag === 'h3') style = 'h3'
-      if (tag === 'blockquote') style = 'blockquote'
 
+    function parseInline(node) {
       const children = []
       node.childNodes.forEach(child => {
-        const marks = []
-        let text = ''
         if (child.nodeType === Node.TEXT_NODE) {
-          text = child.textContent
-        } else {
-          const ct = child.tagName?.toLowerCase()
-          text = child.textContent
-          if (ct === 'strong' || ct === 'b') marks.push('strong')
-          if (ct === 'em' || ct === 'i') marks.push('em')
-          if (ct === 'code') marks.push('code')
-          // Nested marks
-          child.childNodes?.forEach(grandchild => {
-            if (grandchild.nodeType !== Node.TEXT_NODE) {
-              const gt = grandchild.tagName?.toLowerCase()
-              if (gt === 'strong' || gt === 'b') marks.push('strong')
-              if (gt === 'em' || gt === 'i') marks.push('em')
-            }
-          })
+          if (child.textContent) children.push({ _type: 'span', _key: uid(), text: child.textContent, marks: [] })
+          return
         }
-        if (text) children.push({ _type: 'span', _key: uid(), text, marks: [...new Set(marks)] })
+        const tag = child.tagName?.toLowerCase()
+        const marks = []
+        if (tag === 'strong' || tag === 'b') marks.push('strong')
+        if (tag === 'em' || tag === 'i') marks.push('em')
+        if (tag === 'code') marks.push('code')
+        const text = child.textContent
+        if (text) children.push({ _type: 'span', _key: uid(), text, marks })
       })
+      if (!children.length && node.textContent) children.push({ _type: 'span', _key: uid(), text: node.textContent, marks: [] })
+      return children
+    }
 
-      if (children.length === 0 && node.textContent) {
-        children.push({ _type: 'span', _key: uid(), text: node.textContent, marks: [] })
-      }
+    function pushBlock(node, style, listItem, level) {
+      const children = parseInline(node)
+      if (!children.length) return
+      const block = { _type: 'block', _key: uid(), style: style || 'normal', markDefs: [], children }
+      if (listItem) { block.listItem = listItem; block.level = level || 1 }
+      blocks.push(block)
+    }
 
-      blocks.push({ _type: 'block', _key: uid(), style, markDefs: [], children })
-    })
+    function walk(node) {
+      const tag = node.tagName?.toLowerCase()
+      if (!tag) return
+      if (tag === 'p' || tag === 'div') { pushBlock(node, 'normal'); return }
+      if (tag === 'h2') { pushBlock(node, 'h2'); return }
+      if (tag === 'h3') { pushBlock(node, 'h3'); return }
+      if (tag === 'blockquote') { pushBlock(node, 'blockquote'); return }
+      if (tag === 'ul') { node.querySelectorAll('li').forEach(li => pushBlock(li, 'normal', 'bullet', 1)); return }
+      if (tag === 'ol') { node.querySelectorAll('li').forEach(li => pushBlock(li, 'normal', 'number', 1)); return }
+      if (tag === 'br') return
+      // fallback
+      if (node.textContent?.trim()) pushBlock(node, 'normal')
+    }
+
+    div.childNodes.forEach(walk)
     return blocks
   }
 
-  function exec(cmd, val) {
-    ref.current?.focus()
-    document.execCommand(cmd, false, val)
-    sync()
-  }
-
-  function sync() {
-    if (ref.current) onChange(htmlToBlocks(ref.current.innerHTML))
-  }
-
-  // Initialise HTML — runs whenever value first becomes non-empty (handles async edit load)
-  const initialised = useRef(false)
+  // Load content when value arrives (async on edit)
   useEffect(() => {
     if (ref.current && value?.length && !initialised.current) {
       ref.current.innerHTML = blocksToHtml(value)
@@ -222,55 +238,66 @@ function RichTextEditor({ value = [], onChange }) {
     }
   }, [value])
 
+  // Reset initialised when switching between products
+  useEffect(() => {
+    if (!value?.length) {
+      initialised.current = false
+      if (ref.current) ref.current.innerHTML = ''
+    }
+  }, [value?.length === 0])
+
+  function exec(cmd, val) {
+    ref.current?.focus()
+    document.execCommand(cmd, false, val || null)
+    setTimeout(() => { if (ref.current) onChange(htmlToBlocks(ref.current.innerHTML)) }, 0)
+  }
+
+  function sync() {
+    if (ref.current) onChange(htmlToBlocks(ref.current.innerHTML))
+  }
+
   const btnClass = "px-2 py-1 rounded text-slate-400 hover:bg-white/10 hover:text-white transition-colors font-mono text-xs"
 
   return (
     <Field label="Description">
-      {/* Toolbar */}
       <div className="flex items-center gap-0.5 px-2 py-1.5 border border-white/[0.08] border-b-0 rounded-t-lg bg-white/[0.03]">
-        <button type="button" className={btnClass} onClick={() => exec('bold')} title="Bold"><strong>B</strong></button>
-        <button type="button" className={btnClass} onClick={() => exec('italic')} title="Italic"><em>I</em></button>
-        <button type="button" className={btnClass} onClick={() => exec('formatBlock', 'h2')} title="Heading 2">H2</button>
-        <button type="button" className={btnClass} onClick={() => exec('formatBlock', 'h3')} title="Heading 3">H3</button>
-        <button type="button" className={btnClass} onClick={() => { exec('removeFormat'); exec('formatBlock', 'div') }} title="Normal text">¶</button>
+        <button type="button" className={btnClass} onMouseDown={e => { e.preventDefault(); exec('bold') }}><strong>B</strong></button>
+        <button type="button" className={btnClass} onMouseDown={e => { e.preventDefault(); exec('italic') }}><em>I</em></button>
+        <button type="button" className={btnClass} onMouseDown={e => { e.preventDefault(); exec('formatBlock', 'h2') }}>H2</button>
+        <button type="button" className={btnClass} onMouseDown={e => { e.preventDefault(); exec('formatBlock', 'h3') }}>H3</button>
+        <button type="button" className={btnClass} onMouseDown={e => { e.preventDefault(); exec('formatBlock', 'p') }}>¶</button>
         <div className="w-px h-4 bg-white/10 mx-1" />
-        <button type="button" className={btnClass} onClick={() => exec('insertUnorderedList')} title="Bullet list">• list</button>
-        <button type="button" className={btnClass} onClick={() => exec('insertOrderedList')} title="Numbered list">1. list</button>
+        <button type="button" className={btnClass} onMouseDown={e => { e.preventDefault(); exec('insertUnorderedList') }}>• list</button>
+        <button type="button" className={btnClass} onMouseDown={e => { e.preventDefault(); exec('insertOrderedList') }}>1. list</button>
         <div className="w-px h-4 bg-white/10 mx-1" />
-        <button type="button" className={btnClass} onClick={() => exec('removeFormat')} title="Clear format">✕ fmt</button>
+        <button type="button" className={btnClass} onMouseDown={e => { e.preventDefault(); exec('removeFormat') }}>✕ fmt</button>
       </div>
-      {/* Editable area */}
       <div
         ref={ref}
         contentEditable
         suppressContentEditableWarning
         onInput={sync}
         onBlur={sync}
-        className="min-h-40 w-full bg-white/[0.04] border border-white/[0.08] rounded-b-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-500/50 transition-colors prose prose-invert prose-sm max-w-none"
-        style={{
-          lineHeight: '1.6',
-        }}
+        className="min-h-40 w-full bg-white/[0.04] border border-white/[0.08] rounded-b-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-500/50 transition-colors"
+        style={{ lineHeight: '1.7', color: 'white' }}
       />
       <style>{`
-        [contenteditable] { color: white; }
-        [contenteditable] p { margin: 0 0 0.5em; color: white; }
-        [contenteditable] div { color: white; }
-        [contenteditable] span { color: inherit; }
-        [contenteditable] h2 { font-size: 1.2em; font-weight: bold; margin: 0.75em 0 0.25em; color: white; }
-        [contenteditable] h3 { font-size: 1.05em; font-weight: bold; margin: 0.5em 0 0.25em; color: white; }
-        [contenteditable] strong { color: white; font-weight: bold; }
-        [contenteditable] em { color: #67e8f9; }
-        [contenteditable] code { background: rgba(255,255,255,0.08); padding: 1px 4px; border-radius: 3px; font-family: monospace; font-size: 0.9em; color: white; }
-        [contenteditable] ul { list-style: disc; padding-left: 1.5em; margin: 0.5em 0; color: white; }
-        [contenteditable] ol { list-style: decimal; padding-left: 1.5em; margin: 0.5em 0; color: white; }
-        [contenteditable] li { color: white; }
-        [contenteditable]:empty:before { content: attr(data-placeholder); color: #475569; }
+        [contenteditable] { color: #fff !important; }
+        [contenteditable] * { color: #fff !important; }
+        [contenteditable] p, [contenteditable] div { margin: 0 0 0.4em; }
+        [contenteditable] h2 { font-size: 1.2em; font-weight: 700; margin: 0.6em 0 0.2em; }
+        [contenteditable] h3 { font-size: 1.05em; font-weight: 700; margin: 0.5em 0 0.2em; }
+        [contenteditable] strong, [contenteditable] b { font-weight: 700; }
+        [contenteditable] em, [contenteditable] i { font-style: italic; color: #67e8f9 !important; }
+        [contenteditable] code { background: rgba(255,255,255,0.1); padding: 1px 4px; border-radius: 3px; font-family: monospace; }
+        [contenteditable] ul { list-style: disc; padding-left: 1.5em; margin: 0.4em 0; }
+        [contenteditable] ol { list-style: decimal; padding-left: 1.5em; margin: 0.4em 0; }
+        [contenteditable] li { margin: 0.1em 0; }
         [contenteditable]:focus { outline: none; }
       `}</style>
     </Field>
   )
 }
-
 
 function PreviewImagesUploader({ value = [], onChange }) {
   const [uploading, setUploading] = useState(false)
