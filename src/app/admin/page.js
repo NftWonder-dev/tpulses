@@ -193,6 +193,7 @@ function RichTextEditor({ value = [], onChange }) {
           return
         }
         const tag = child.tagName?.toLowerCase()
+        if (tag === 'br') return
         const marks = []
         if (tag === 'strong' || tag === 'b') marks.push('strong')
         if (tag === 'em' || tag === 'i') marks.push('em')
@@ -200,30 +201,44 @@ function RichTextEditor({ value = [], onChange }) {
         const text = child.textContent
         if (text) children.push({ _type: 'span', _key: uid(), text, marks })
       })
-      if (!children.length && node.textContent) children.push({ _type: 'span', _key: uid(), text: node.textContent, marks: [] })
+      if (!children.length && node.textContent?.trim()) {
+        children.push({ _type: 'span', _key: uid(), text: node.textContent, marks: [] })
+      }
       return children
+    }
+
+    function emptyBlock() {
+      return { _type: 'block', _key: uid(), style: 'normal', markDefs: [], children: [{ _type: 'span', _key: uid(), text: '', marks: [] }] }
     }
 
     function pushBlock(node, style, listItem, level) {
       const children = parseInline(node)
-      if (!children.length) return
-      const block = { _type: 'block', _key: uid(), style: style || 'normal', markDefs: [], children }
+      // Empty node (just a <br> or nothing) = blank line, preserve as empty block
+      const onlyBr = node.childNodes.length === 1 && node.firstChild?.tagName?.toLowerCase() === 'br'
+      const isEmpty = node.childNodes.length === 0 || onlyBr
+      if (!children.length && !isEmpty) return
+      const blockChildren = children.length ? children : [{ _type: 'span', _key: uid(), text: '', marks: [] }]
+      const block = { _type: 'block', _key: uid(), style: style || 'normal', markDefs: [], children: blockChildren }
       if (listItem) { block.listItem = listItem; block.level = level || 1 }
       blocks.push(block)
     }
 
     function walk(node) {
       const tag = node.tagName?.toLowerCase()
-      if (!tag) return
+      if (!tag) {
+        // bare text node at root level
+        if (node.nodeType === Node.TEXT_NODE && node.textContent?.trim()) {
+          blocks.push({ _type: 'block', _key: uid(), style: 'normal', markDefs: [], children: [{ _type: 'span', _key: uid(), text: node.textContent, marks: [] }] })
+        }
+        return
+      }
       if (tag === 'p' || tag === 'div') { pushBlock(node, 'normal'); return }
       if (tag === 'h2') { pushBlock(node, 'h2'); return }
       if (tag === 'h3') { pushBlock(node, 'h3'); return }
       if (tag === 'blockquote') { pushBlock(node, 'blockquote'); return }
-      if (tag === 'ul') { node.querySelectorAll('li').forEach(li => pushBlock(li, 'normal', 'bullet', 1)); return }
-      if (tag === 'ol') { node.querySelectorAll('li').forEach(li => pushBlock(li, 'normal', 'number', 1)); return }
-      if (tag === 'br') return
-      // fallback
-      if (node.textContent?.trim()) pushBlock(node, 'normal')
+      if (tag === 'ul') { node.querySelectorAll(':scope > li').forEach(li => pushBlock(li, 'normal', 'bullet', 1)); return }
+      if (tag === 'ol') { node.querySelectorAll(':scope > li').forEach(li => pushBlock(li, 'normal', 'number', 1)); return }
+      if (tag === 'br') { blocks.push(emptyBlock()); return }
     }
 
     div.childNodes.forEach(walk)
@@ -253,7 +268,7 @@ function RichTextEditor({ value = [], onChange }) {
   }
 
   function sync() {
-    if (ref.current) onChange(htmlToBlocks(ref.current.innerHTML))
+    setTimeout(() => { if (ref.current) onChange(htmlToBlocks(ref.current.innerHTML)) }, 50)
   }
 
   const btnClass = "px-2 py-1 rounded text-slate-400 hover:bg-white/10 hover:text-white transition-colors font-mono text-xs"
