@@ -104,6 +104,23 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* Collections Grid */}
+      <section id="categories" className="py-24 bg-slate-900/20">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="font-space-grotesk text-5xl font-bold mb-4">
+              All Collections
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {collections.map((collection) => (
+              <CollectionCard key={collection._id} collection={collection} />
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Theory Section */}
       <section id="about" className="py-32 relative border-t border-white/5">
         <div className="max-w-7xl mx-auto px-6">
@@ -134,23 +151,6 @@ export default async function HomePage() {
                 </span>
               </p>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Collections Grid */}
-      <section id="categories" className="py-24 bg-slate-900/20">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="font-space-grotesk text-5xl font-bold mb-4">
-              All Collections
-            </h2>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {collections.map((collection) => (
-              <CollectionCard key={collection._id} collection={collection} />
-            ))}
           </div>
         </div>
       </section>
