@@ -3,6 +3,8 @@ import { COLLECTIONS_QUERY, FEATURED_PRODUCTS_QUERY } from "@/lib/queries";
 import CollectionCard from "@/components/ui/CollectionCard";
 import { ArrowRight, Cpu, Headphones, Music2 } from "lucide-react";
 import Link from "next/link";
+import { Play } from "lucide-react";
+import VideoButton from "@/components/VideoButton";
 
 export const revalidate = 60;
 
@@ -83,6 +85,24 @@ export default async function HomePage() {
           </div>
         </div>
       </header>
+
+      {/* Explainer Video Section */}
+      <section className="pt-10 pb-0">
+        <div className="max-w-4xl mx-auto px-4 text-center mb-12">
+          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-4">
+            How We Make It Musical
+          </h2>
+          <p className="text-lg text-white/60 max-w-2xl mx-auto">
+            Watch how we create the impulse responses that harmonize with your
+            music
+          </p>
+        </div>
+
+        {/* Video Thumbnail with Play Button */}
+        <div className="w-full bg-black overflow-hidden">
+          <VideoButton />
+        </div>
+      </section>
 
       {/* Theory Section */}
       <section id="about" className="py-32 relative border-t border-white/5">

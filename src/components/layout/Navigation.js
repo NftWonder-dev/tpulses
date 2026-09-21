@@ -2,13 +2,20 @@
 
 import Link from "next/link";
 import { ShoppingCart, Activity, Menu, X } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCart } from "@/context/CartContext";
 
 export default function Navigation() {
   const { getCartCount } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [cartCount, setCartCount] = useState(0); // ← ADD THIS
+  const [isMounted, setIsMounted] = useState(false); // ← ADD THIS
+
+  useEffect(() => {
+    setIsMounted(true);
+    setCartCount(getCartCount());
+  }, [getCartCount]);
 
   const handleFreePack = async () => {
     try {
@@ -40,7 +47,8 @@ export default function Navigation() {
   };
 
   return (
-    <nav className="fixed top-0 w-full z-50 border-b border-white/5 bg-deep-bg/80 backdrop-blur-md">
+    <nav className="fixed top-0 w-full z-50 border-b border-white/5 bg-deep-bg/95">
+      {" "}
       <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 cursor-pointer">
@@ -69,21 +77,21 @@ export default function Navigation() {
           <Link href="/faq" className="hover:text-cyan-400 transition-colors">
             FAQ
           </Link>
-          <a
+          <Link
             href="/specifications"
             className="hover:text-cyan-400 transition-colors"
           >
             Specifications
-          </a>
+          </Link>
         </div>
 
         {/* Desktop Right Side */}
         <div className="hidden md:flex items-center gap-6">
           <Link href="/cart" className="relative group">
             <ShoppingCart className="w-5 h-5 text-slate-300 group-hover:text-cyan-400 transition-colors" />
-            {getCartCount() > 0 && (
+            {isMounted && cartCount > 0 && (
               <span className="absolute -top-2 -right-2 bg-magenta-600 text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
-                {getCartCount()}
+                {cartCount}
               </span>
             )}
           </Link>
@@ -100,9 +108,17 @@ export default function Navigation() {
         <div className="flex md:hidden items-center gap-4">
           <Link href="/cart" className="relative group">
             <ShoppingCart className="w-5 h-5 text-slate-300 group-hover:text-cyan-400 transition-colors" />
-            {getCartCount() > 0 && (
+            {isMounted && cartCount > 0 && (
               <span className="absolute -top-2 -right-2 bg-magenta-600 text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
-                {getCartCount()}
+                {cartCount}
+              </span>
+            )}
+          </Link>
+          <Link href="/cart" className="relative group">
+            <ShoppingCart className="w-5 h-5 text-slate-300 group-hover:text-cyan-400 transition-colors" />
+            {isMounted && cartCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-magenta-600 text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
+                {cartCount}
               </span>
             )}
           </Link>
@@ -118,7 +134,6 @@ export default function Navigation() {
           </button>
         </div>
       </div>
-
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-white/5 bg-deep-bg">
@@ -144,13 +159,13 @@ export default function Navigation() {
             >
               FAQ
             </Link>
-            <a
+            <Link
               href="/specifications"
               className="block font-space-mono text-sm uppercase tracking-widest text-slate-400 hover:text-cyan-400 transition-colors py-2"
               onClick={() => setMobileMenuOpen(false)}
             >
               Specifications
-            </a>
+            </Link>
             <button
               onClick={() => {
                 handleFreePack();
