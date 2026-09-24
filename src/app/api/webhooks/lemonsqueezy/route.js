@@ -27,16 +27,39 @@ async function getCartFromRedis(redisKey) {
 
   console.log("Redis response status:", response.status);
   const data = await response.json();
-  console.log("Redis response data:", data);
+  console.log("Redis raw response:", JSON.stringify(data, null, 2));
 
-  if (data.result) {
-    const cartData = JSON.parse(JSON.parse(data.result)); // ← PARSE TWICE!
-    console.log("✅ Cart retrieved from Redis:", cartData);
-    return cartData;
+  if (!data.result) {
+    console.log("❌ data.result is null/undefined");
+    return null;
   }
 
-  console.log("❌ No cart data found in Redis");
-  return null;
+  console.log("Redis result type:", typeof data.result);
+  console.log("Redis result value:", data.result);
+
+  try {
+    // First parse
+    const firstParse = JSON.parse(data.result);
+    console.log("After first parse:", JSON.stringify(firstParse, null, 2));
+
+    // Second parse
+    const cartData = JSON.parse(firstParse);
+    console.log("After second parse:", JSON.stringify(cartData, null, 2));
+    console.log("cartData type:", typeof cartData);
+    console.log("cartData.cartItems:", cartData.cartItems);
+
+    if (!cartData.cartItems) {
+      console.error("❌ cartData.cartItems is missing!");
+      return null;
+    }
+
+    console.log("✅ Cart retrieved successfully");
+    return cartData;
+  } catch (error) {
+    console.error("❌ Parse error:", error.message);
+    console.error("Stack:", error.stack);
+    return null;
+  }
 }
 
 async function deleteCartFromRedis(redisKey) {
