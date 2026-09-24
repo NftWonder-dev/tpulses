@@ -54,8 +54,11 @@ export default function Footer() {
               </Link>
             </li>
             <li>
-              <a href="#" className="hover:text-cyan-400 transition-colors">
-                Featured Products
+              <a
+                href="/theory"
+                className="hover:text-cyan-400 transition-colors"
+              >
+                Theory
               </a>
             </li>
           </ul>
