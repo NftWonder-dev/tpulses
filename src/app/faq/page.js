@@ -137,10 +137,10 @@ export default function FAQPage() {
                 Because Music has a lot of different BPM measures,{" "}
                 <span className="font-bold text-white">
                   each curve has a different decay feeling
-                </span>
+                </span>{" "}
                 that will adapt better to that BPM. We have built eight examples
-                on each product for you to choose the feeling that better fits
-                your needs.
+                on each product for you to choose the feeling that suits your
+                needs.
               </p>
             </div>
           </div>
