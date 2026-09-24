@@ -127,6 +127,22 @@ export default function FAQPage() {
                 even at long settings.
               </p>
             </div>
+
+            {/* Question 7 */}
+            <div className="glass-card p-6 rounded-xl">
+              <h3 className="font-space-grotesk text-xl font-bold text-white mb-3">
+                What so many Curves?
+              </h3>
+              <p className="text-slate-300 leading-relaxed">
+                Because Music has a lot of different BPM measures,{" "}
+                <span className="font-bold text-white">
+                  each curve has a different decay feeling
+                </span>
+                that will adapt better to that BPM. We have built eight examples
+                on each product for you to choose the feeling that better fits
+                your needs.
+              </p>
+            </div>
           </div>
         </section>
 
@@ -137,7 +153,7 @@ export default function FAQPage() {
           </h2>
 
           <div className="space-y-8">
-            {/* Question 7 */}
+            {/* Question 8 */}
             <div className="glass-card p-6 rounded-xl">
               <h3 className="font-space-grotesk text-xl font-bold text-white mb-3">
                 What sample rates are supported?
@@ -152,7 +168,7 @@ export default function FAQPage() {
               </p>
             </div>
 
-            {/* Question 8 */}
+            {/* Question 9 */}
             <div className="glass-card p-6 rounded-xl">
               <h3 className="font-space-grotesk text-xl font-bold text-white mb-3">
                 What do the codes like "WN," "FT," and "AST" mean?
@@ -178,7 +194,7 @@ export default function FAQPage() {
               </ul>
             </div>
 
-            {/* Question 9 */}
+            {/* Question 10 */}
             <div className="glass-card p-6 rounded-xl">
               <h3 className="font-space-grotesk text-xl font-bold text-white mb-3">
                 Can I use these IRs for something other than vocals?
