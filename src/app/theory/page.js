@@ -44,7 +44,7 @@ export default function TheoryPage() {
                 Harmonic Integration: Turning Reverb into Music
               </h2>
               <p className="text-slate-400 text-lg leading-relaxed mb-6">
-                A core innovation of this methodology is that the reverb is an
+                The core innovation of this methodology is that the reverb is an
                 extension of the composition's tonality. The IRs are categorized
                 into{" "}
                 <span className="font-bold text-white">
@@ -52,7 +52,8 @@ export default function TheoryPage() {
                 </span>
                 , ensuring the reverb frequency response is perfectly aligned
                 with the track's key, by balancing the energy of the dominant
-                frequences.
+                frequencies of the direct sound with the decaying frequencies of
+                the reverberated sound.
               </p>
 
               <ul className="space-y-4 text-slate-400 text-lg">
