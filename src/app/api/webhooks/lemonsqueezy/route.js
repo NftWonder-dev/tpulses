@@ -30,7 +30,7 @@ async function getCartFromRedis(redisKey) {
   console.log("Redis response data:", data);
 
   if (data.result) {
-    const cartData = JSON.parse(data.result);
+    const cartData = JSON.parse(JSON.parse(data.result)); // ← PARSE TWICE!
     console.log("✅ Cart retrieved from Redis:", cartData);
     return cartData;
   }
