@@ -3,8 +3,6 @@ import { NextResponse } from "next/server";
 
 const LEMONSQUEEZY_API_KEY = process.env.LEMONSQUEEZY_API_KEY;
 const LEMONSQUEEZY_STORE_ID = process.env.LEMONSQUEEZY_STORE_ID;
-const UPSTASH_REDIS_REST_URL = process.env.UPSTASH_REDIS_REST_URL;
-const UPSTASH_REDIS_REST_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 
 export async function POST(request) {
   try {
@@ -32,11 +30,6 @@ export async function POST(request) {
 
     // Calculate total price for all products
     const totalPrice = cartItems.reduce((sum, item) => sum + item.price, 0);
-
-    console.log("==== STORING CART IN REDIS ====");
-    console.log("Cart items count:", cartItems.length);
-    console.log("Cart items details:", JSON.stringify(cartItems, null, 2));
-    console.log("============================");
 
     console.log("Total price:", totalPrice);
     console.log(
@@ -103,49 +96,9 @@ export async function POST(request) {
       throw new Error(data.errors?.[0]?.detail || "Failed to create checkout");
     }
 
-    const checkoutId = data.data.id;
-    const checkoutUrl = data.data.attributes.url;
-
-    console.log("Checkout created:", checkoutId);
-
-    // Store cart in Redis with checkoutId as key (expires in 24 hours)
-    const redisKey = `cart:${cartItems[0].lemonsqueezyVariantId}`;
-    const cartData = {
-      cartItems,
-      customerEmail,
-      createdAt: new Date().toISOString(),
-    };
-
-    const redisResponse = await fetch(
-      `${UPSTASH_REDIS_REST_URL}/set/${redisKey}`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${UPSTASH_REDIS_REST_TOKEN}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          value: JSON.stringify(cartData),
-          ex: 86400, // 24 hours in seconds
-        }),
-      },
-    );
-
-    if (!redisResponse.ok) {
-      console.error("Failed to store cart in Redis");
-      throw new Error("Failed to store cart data");
-    }
-
-    console.log("==== REDIS STORAGE SUCCESS ====");
-    console.log("Stored with key:", redisKey);
-    console.log("Cart data stored:", JSON.stringify(cartData, null, 2));
-    console.log("============================");
-
-    console.log("Cart stored in Redis with key:", redisKey);
-
     return NextResponse.json({
-      checkoutUrl,
-      checkoutId,
+      checkoutUrl: data.data.attributes.url,
+      checkoutId: data.data.id,
     });
   } catch (error) {
     console.error("Cart checkout error:", error);

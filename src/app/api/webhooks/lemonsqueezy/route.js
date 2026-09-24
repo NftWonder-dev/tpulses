@@ -4,8 +4,6 @@ import crypto from "crypto";
 import { client } from "@/lib/sanity";
 
 const WEBHOOK_SECRET = process.env.LEMONSQUEEZY_WEBHOOK_SECRET;
-const UPSTASH_REDIS_REST_URL = process.env.UPSTASH_REDIS_REST_URL;
-const UPSTASH_REDIS_REST_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 
 function verifyWebhookSignature(payload, signature) {
   const hash = crypto
@@ -15,195 +13,90 @@ function verifyWebhookSignature(payload, signature) {
   return hash === signature;
 }
 
-async function getCartFromRedis(redisKey) {
-  console.log("📦 Fetching from Redis with key:", redisKey);
-
-  const response = await fetch(`${UPSTASH_REDIS_REST_URL}/get/${redisKey}`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${UPSTASH_REDIS_REST_TOKEN}`,
-    },
-  });
-
-  console.log("Redis response status:", response.status);
-  const data = await response.json();
-  console.log("Redis raw response:", JSON.stringify(data, null, 2));
-
-  if (!data.result) {
-    console.log("❌ data.result is null/undefined");
-    return null;
-  }
-
-  console.log("Redis result type:", typeof data.result);
-  console.log("Redis result value:", data.result);
-
-  try {
-    // First parse
-    const firstParse = JSON.parse(data.result);
-    console.log("After first parse:", JSON.stringify(firstParse, null, 2));
-
-    // Second parse
-    const cartData = JSON.parse(firstParse);
-    console.log("After second parse:", JSON.stringify(cartData, null, 2));
-    console.log("cartData type:", typeof cartData);
-    console.log("cartData.cartItems:", cartData.cartItems);
-
-    if (!cartData.cartItems) {
-      console.error("❌ cartData.cartItems is missing!");
-      return null;
-    }
-
-    console.log("✅ Cart retrieved successfully");
-    return cartData;
-  } catch (error) {
-    console.error("❌ Parse error:", error.message);
-    console.error("Stack:", error.stack);
-    return null;
-  }
-}
-
-async function deleteCartFromRedis(redisKey) {
-  await fetch(`${UPSTASH_REDIS_REST_URL}/del/${redisKey}`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${UPSTASH_REDIS_REST_TOKEN}`,
-    },
-  });
-  console.log("🗑️ Deleted cart from Redis:", redisKey);
-}
-
 export async function POST(request) {
   try {
-    console.log("🔔 WEBHOOK RECEIVED");
-
     const payload = await request.text();
     const signature = request.headers.get("x-signature");
 
     if (!verifyWebhookSignature(payload, signature)) {
-      console.error("❌ Invalid webhook signature");
+      console.error("Invalid webhook signature");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const data = JSON.parse(payload);
-    console.log("Webhook event:", data.meta.event_name);
 
     if (data.meta.event_name !== "order_created") {
-      console.log("⏭️ Skipping non-order_created event");
       return NextResponse.json({ success: true });
     }
 
     const order = data.data;
-    console.log("📋 Order ID:", order.id);
-    console.log("💰 Order total:", order.attributes.total);
-    console.log("📧 Customer email:", order.attributes.customer_email);
+    const customerEmail = order.attributes.customer_email;
+    const variantId = order.attributes.first_order_item?.variant_id;
 
-    // Get first variant ID
-    const firstVariantId = order.attributes.first_order_item?.variant_id;
-    console.log("🔍 First variant ID:", firstVariantId);
+    console.log("Order created:", order.id);
+    console.log("Variant ID:", variantId);
 
-    if (!firstVariantId) {
-      console.error("❌ No variant ID found");
+    if (!variantId) {
+      console.error("No variant ID found");
       return NextResponse.json({ error: "No variant ID" }, { status: 400 });
     }
 
-    // Get cart from Redis
-    const redisKey = `cart:${firstVariantId}`;
-    const cartData = await getCartFromRedis(redisKey);
-
-    if (!cartData) {
-      console.error("❌ Cart not found in Redis for key:", redisKey);
-      console.error("Available keys would start with 'cart:'");
-      return NextResponse.json({ error: "Cart not found" }, { status: 400 });
-    }
-
-    const { cartItems, customerEmail } = cartData;
-    console.log("📦 Cart items count:", cartItems.length);
-    console.log(
-      "📦 Cart items:",
-      cartItems.map((i) => i.name),
+    // Query Sanity for product
+    const product = await client.fetch(
+      `*[_type == "product" && lemonsqueezyVariantId == $variantId][0] { name, fileUrl }`,
+      { variantId: variantId.toString() },
     );
 
-    // Process all products
-    const products = [];
-
-    for (const item of cartItems) {
-      console.log(`\n🔄 Processing: ${item.name}`);
-      console.log(`   Variant ID: ${item.lemonsqueezyVariantId}`);
-      console.log(`   File URL: ${item.fileUrl}`);
-
-      // Query Sanity
-      console.log(`   📌 Querying Sanity...`);
-      const product = await client.fetch(
-        `*[_type == "product" && lemonsqueezyVariantId == $variantId][0] { name, fileUrl }`,
-        { variantId: item.lemonsqueezyVariantId.toString() },
-      );
-
-      if (!product) {
-        console.error(`   ❌ Product not found in Sanity`);
-        continue;
-      }
-
-      console.log(`   ✅ Found in Sanity: ${product.name}`);
-
-      // Generate download URL
-      console.log(`   🔗 Generating S3 URL...`);
-      const downloadResponse = await fetch(
-        "https://trimpulses.com/api/download",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ fileKey: product.fileUrl }),
-        },
-      );
-
-      if (!downloadResponse.ok) {
-        console.error(`   ❌ Failed to generate download URL`);
-        continue;
-      }
-
-      const { downloadUrl } = await downloadResponse.json();
-      console.log(`   ✅ Download URL generated`);
-
-      products.push({
-        name: product.name,
-        downloadUrl,
-      });
+    if (!product) {
+      console.error(`Product not found for variant ${variantId}`);
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
-    console.log(`\n📧 Prepared products for email:`, products.length);
+    console.log("Found product:", product.name);
 
-    if (products.length === 0) {
-      console.error("❌ No products to email");
-      return NextResponse.json({ error: "No products" }, { status: 400 });
+    // Generate S3 signed URL
+    const downloadResponse = await fetch(
+      "https://trimpulses.com/api/download",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileKey: product.fileUrl }),
+      },
+    );
+
+    if (!downloadResponse.ok) {
+      throw new Error("Failed to generate download URL");
     }
+
+    const { downloadUrl } = await downloadResponse.json();
 
     // Send email
-    console.log(`📤 Sending email to: ${customerEmail}`);
     const emailResponse = await fetch("https://trimpulses.com/api/send-email", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         customerEmail,
-        products,
+        products: [
+          {
+            name: product.name,
+            downloadUrl,
+          },
+        ],
       }),
     });
 
     if (!emailResponse.ok) {
-      console.error("❌ Failed to send email");
-      const errorData = await emailResponse.text();
-      console.error("Email API error:", errorData);
       throw new Error("Failed to send email");
     }
 
-    console.log("✅ Email sent successfully");
+    console.log("Email sent successfully");
 
-    // Cleanup
-    await deleteCartFromRedis(redisKey);
-
-    console.log("\n✅ WEBHOOK COMPLETED SUCCESSFULLY\n");
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("❌ WEBHOOK ERROR:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("Webhook error:", error);
+    return NextResponse.json(
+      { error: error.message || "Webhook processing failed" },
+      { status: 500 },
+    );
   }
 }
