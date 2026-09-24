@@ -174,7 +174,7 @@ export default function SpecificationsPage() {
             </div>
 
             <img
-              src="https://i.imgur.com/BSE08Jh.png"
+              src="https://imgur.com/a/ohKxndP.png"
               alt="Modal Variations"
               className="w-full rounded-lg"
             />
