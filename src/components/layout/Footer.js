@@ -32,7 +32,7 @@ export default function Footer() {
               <Youtube className="w-4 h-4" />
             </a>
             <a
-              href="#"
+              href="https://www.youtube.com/@TRIMPulses"
               className="p-2 bg-white/5 rounded-full hover:bg-cyan-500/20 hover:text-cyan-400 transition-colors"
             >
               <Twitter className="w-4 h-4" />
