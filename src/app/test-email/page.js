@@ -1,11 +1,11 @@
 // app/test-email/page.js - Test page with multiple products option
 "use client";
 
-import { useState } from 'react';
+import { useState } from "react";
 
 export default function TestEmailPage() {
-  const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const [multiProduct, setMultiProduct] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [result, setResult] = useState(null);
@@ -19,52 +19,60 @@ export default function TestEmailPage() {
       // Single product test data
       const singleProductData = {
         customerEmail: email,
-        customerName: name || 'Test Customer',
+        customerName: name || "Test Customer",
         products: [
           {
-            name: '50.00 % LIN',
-            fileKey: 'products/test-product-1/test-product-1.zip'
-          }
+            name: "50.00 % LIN",
+            fileKey: "products/test-product-1/test-product-1.zip",
+          },
         ],
-        orderTotal: '10.00'
+        orderTotal: "10.00",
       };
 
       // Multiple products test data
       const multiProductData = {
         customerEmail: email,
-        customerName: name || 'Test Customer',
+        customerName: name || "Test Customer",
         products: [
           {
-            name: '50.00 % LIN',
-            fileKey: 'products/test-product-1/test-product-1.zip'
+            name: "50.00 % LIN",
+            fileKey: "products/test-product-1/test-product-1.zip",
           },
           {
-            name: '29.95 % HS033',
-            fileKey: 'products/test-product-1/test-product-1.zip'
+            name: "29.95 % HS033",
+            fileKey: "products/test-product-1/test-product-1.zip",
           },
           {
-            name: '40.40 % SC044',
-            fileKey: 'products/test-product-1/test-product-1.zip'
-          }
+            name: "40.40 % SC044",
+            fileKey: "products/test-product-1/test-product-1.zip",
+          },
         ],
-        orderTotal: '30.00'
+        orderTotal: "30.00",
       };
 
-      const response = await fetch('/api/send-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(multiProduct ? multiProductData : singleProductData),
+      const response = await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(
+          multiProduct ? multiProductData : singleProductData,
+        ),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        setResult({ success: true, message: 'Email sent successfully! Check your inbox.' });
+        setResult({
+          success: true,
+          message: "Email sent successfully! Check your inbox.",
+        });
       } else {
-        setResult({ success: false, message: data.error || 'Failed to send email' });
+        setResult({
+          success: false,
+          message: data.error || "Failed to send email",
+        });
       }
     } catch (error) {
-      setResult({ success: false, message: 'Error sending email' });
+      setResult({ success: false, message: "Error sending email" });
     } finally {
       setIsSending(false);
     }
@@ -76,7 +84,7 @@ export default function TestEmailPage() {
         <h1 className="font-space-grotesk text-5xl font-bold mb-8">
           Test Email System
         </h1>
-        
+
         <div className="glass-card p-8 rounded-xl">
           <p className="text-slate-400 mb-6">
             Send a test purchase confirmation email with download links.
@@ -128,16 +136,18 @@ export default function TestEmailPage() {
               disabled={isSending}
               className="w-full bg-cyan-500 hover:bg-cyan-400 text-black py-4 rounded-lg font-bold uppercase tracking-widest transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSending ? 'Sending...' : 'Send Test Email'}
+              {isSending ? "Sending..." : "Send Test Email"}
             </button>
           </form>
 
           {result && (
-            <div className={`mt-6 p-4 rounded-lg ${
-              result.success 
-                ? 'bg-green-500/10 border border-green-500/20 text-green-400' 
-                : 'bg-red-500/10 border border-red-500/20 text-red-400'
-            }`}>
+            <div
+              className={`mt-6 p-4 rounded-lg ${
+                result.success
+                  ? "bg-green-500/10 border border-green-500/20 text-green-400"
+                  : "bg-red-500/10 border border-red-500/20 text-red-400"
+              }`}
+            >
               {result.message}
             </div>
           )}
