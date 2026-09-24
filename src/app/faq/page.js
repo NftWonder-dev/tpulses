@@ -184,13 +184,14 @@ export default function FAQPage() {
                 Can I use these IRs for something other than vocals?
               </h3>
               <p className="text-slate-300 leading-relaxed">
-                Absolutely. While they are excellent for "strong vocals," they
-                are designed as{" "}
+                Absolutely. All impulse responses are designed to be versatile
+                and can be applied to any audio source. They are designed as{" "}
                 <span className="font-bold text-white">
                   general-purpose impulses
                 </span>{" "}
-                for instruments, drums, or any electronic musical source that
-                requires a professional, tuned space.
+                for instruments, drums, any electronic musical source or even
+                directly in a Master Mix that requires a professional, tuned
+                space.
               </p>
             </div>
           </div>
