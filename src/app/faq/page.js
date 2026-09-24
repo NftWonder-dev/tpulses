@@ -131,7 +131,7 @@ export default function FAQPage() {
             {/* Question 7 */}
             <div className="glass-card p-6 rounded-xl">
               <h3 className="font-space-grotesk text-xl font-bold text-white mb-3">
-                What so many Curves?
+                Why so many Curves?
               </h3>
               <p className="text-slate-300 leading-relaxed">
                 Because Music has a lot of different BPM measures,{" "}
