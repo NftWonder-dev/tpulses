@@ -234,7 +234,7 @@ export default async function HomePage() {
               sequence control of sources, from natural acoustic elements to
               algorithmic noise profiles. All IRs are harmonically tuned to
               ensure your reverb is not just heard, but felt as a musical
-              extension of your sound.
+              extension of your sound!
             </p>
             <a
               href="/collections"
