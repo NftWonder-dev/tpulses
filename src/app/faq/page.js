@@ -189,9 +189,11 @@ export default function FAQPage() {
                 <span className="font-bold text-white">
                   general-purpose impulses
                 </span>{" "}
-                for instruments, drums, any electronic musical source or even
-                directly in a Master Mix that requires a professional, tuned
-                space.
+                for instruments, drums, any electronic musical source or{" "}
+                <span className="font-bold text-white">
+                  even directly in a Master Mix
+                </span>{" "}
+                that requires a professional, tuned space.
               </p>
             </div>
           </div>
