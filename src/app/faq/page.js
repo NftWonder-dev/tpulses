@@ -65,10 +65,10 @@ export default function FAQPage() {
                   "Anti-Masking" secret
                 </span>
                 . During the creation of the IR, we mathematically decrease the
-                amplitude of the root note's fundamental frequency. This creates
-                a "sonic hole" that allows your dry instrument or vocal to sit
-                perfectly in the center of the mix while the reverb blooms
-                around the harmonics.
+                amplitude of the root's chord notes frequencies. This creates a
+                "sonic space" that allows your dry instrument or vocal to sit
+                perfectly in the mix while the reverb blooms around the
+                harmonics.
               </p>
             </div>
           </div>
