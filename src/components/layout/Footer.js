@@ -20,7 +20,6 @@ export default function Footer() {
           </p>
           <div className="flex gap-4">
             <a
-              href="#"
               href="https://www.instagram.com/TRIMPulses"
               target="_blank"
               rel="noopener noreferrer"
@@ -61,12 +60,12 @@ export default function Footer() {
               </Link>
             </li>
             <li>
-              <a
+              <Link
                 href="/theory"
                 className="hover:text-cyan-400 transition-colors"
               >
                 Theory
-              </a>
+              </Link>
             </li>
           </ul>
         </div>
@@ -77,17 +76,20 @@ export default function Footer() {
           </h5>
           <ul className="text-slate-500 text-sm space-y-4">
             <li>
-              <a href="faq" className="hover:text-cyan-400 transition-colors">
+              <Link
+                href="/faq"
+                className="hover:text-cyan-400 transition-colors"
+              >
                 FAQ
-              </a>
+              </Link>
             </li>
             <li>
-              <a
+              <Link
                 href="/specifications"
                 className="hover:text-cyan-400 transition-colors"
               >
                 IR Guide
-              </a>
+              </Link>
             </li>
           </ul>
         </div>
