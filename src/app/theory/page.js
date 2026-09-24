@@ -53,7 +53,7 @@ export default function TheoryPage() {
                 , ensuring the reverb frequency response is perfectly aligned
                 with the track's key, by balancing the energy of the dominant
                 frequencies of the direct sound with the decaying frequencies of
-                the reverberated sound.
+                the applied reverb.
               </p>
 
               <ul className="space-y-4 text-slate-400 text-lg">
@@ -148,10 +148,10 @@ export default function TheoryPage() {
                   <span className="font-bold text-white">
                     Frequency Constant Area (ISO):
                   </span>{" "}
-                  Advanced collections use the "ISO" principle, where the
-                  frequency energy of each decay band is kept constant, ensuring
-                  that no specific frequency range "piles up" or masks others
-                  during long decay times.
+                  Some collections use the "ISO" principle, where the frequency
+                  energy of each decay band is kept constant, ensuring that no
+                  specific frequency range "piles up" or masks others during
+                  long decay times.
                 </li>
               </ul>
             </div>
