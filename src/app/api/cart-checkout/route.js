@@ -1,8 +1,10 @@
-// app/api/cart-checkout/route.js - DEBUG VERSION
+// app/api/cart-checkout/route.js
 import { NextResponse } from "next/server";
 
 const LEMONSQUEEZY_API_KEY = process.env.LEMONSQUEEZY_API_KEY;
 const LEMONSQUEEZY_STORE_ID = process.env.LEMONSQUEEZY_STORE_ID;
+const UPSTASH_REDIS_REST_URL = process.env.UPSTASH_REDIS_REST_URL;
+const UPSTASH_REDIS_REST_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 
 export async function POST(request) {
   try {
@@ -28,27 +30,21 @@ export async function POST(request) {
       );
     }
 
-    // For now, let's try with just the FIRST product (single checkout)
-    const firstProduct = cartItems[0];
+    // Calculate total price for all products
+    const totalPrice = cartItems.reduce((sum, item) => sum + item.price, 0);
 
-    console.log("Creating checkout for:", firstProduct);
-    console.log("Variant ID:", firstProduct.lemonsqueezyVariantId);
+    console.log("==== STORING CART IN REDIS ====");
+    console.log("Cart items count:", cartItems.length);
+    console.log("Cart items details:", JSON.stringify(cartItems, null, 2));
+    console.log("============================");
 
-    const customData = [
-      JSON.stringify({
-        products: cartItems.map((item) => ({
-          name: item.name,
-          fileKey: item.fileUrl,
-        })),
-      }),
-    ];
-
-    console.log("Custom data being sent:", customData);
+    console.log("Total price:", totalPrice);
     console.log(
       "Cart items:",
-      cartItems.map((i) => ({ name: i.name, fileUrl: i.fileUrl })),
+      cartItems.map((i) => ({ name: i.name, price: i.price })),
     );
 
+    // Build checkout request
     const requestBody = {
       data: {
         type: "checkouts",
@@ -60,8 +56,8 @@ export async function POST(request) {
           },
           checkout_data: {
             email: customerEmail || undefined,
-            custom_price: undefined,
           },
+          custom_price: Math.round(totalPrice * 100), // in cents
           product_options: {
             redirect_url: "https://trimpulses.com/order-success",
           },
@@ -76,7 +72,7 @@ export async function POST(request) {
           variant: {
             data: {
               type: "variants",
-              id: firstProduct.lemonsqueezyVariantId.toString(),
+              id: cartItems[0].lemonsqueezyVariantId.toString(),
             },
           },
         },
@@ -107,9 +103,49 @@ export async function POST(request) {
       throw new Error(data.errors?.[0]?.detail || "Failed to create checkout");
     }
 
+    const checkoutId = data.data.id;
+    const checkoutUrl = data.data.attributes.url;
+
+    console.log("Checkout created:", checkoutId);
+
+    // Store cart in Redis with checkoutId as key (expires in 24 hours)
+    const redisKey = `checkout:${checkoutId}`;
+    const cartData = {
+      cartItems,
+      customerEmail,
+      createdAt: new Date().toISOString(),
+    };
+
+    const redisResponse = await fetch(
+      `${UPSTASH_REDIS_REST_URL}/set/${redisKey}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${UPSTASH_REDIS_REST_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          value: JSON.stringify(cartData),
+          ex: 86400, // 24 hours in seconds
+        }),
+      },
+    );
+
+    if (!redisResponse.ok) {
+      console.error("Failed to store cart in Redis");
+      throw new Error("Failed to store cart data");
+    }
+
+    console.log("==== REDIS STORAGE SUCCESS ====");
+    console.log("Stored with key:", redisKey);
+    console.log("Cart data stored:", JSON.stringify(cartData, null, 2));
+    console.log("============================");
+
+    console.log("Cart stored in Redis with key:", redisKey);
+
     return NextResponse.json({
-      checkoutUrl: data.data.attributes.url,
-      checkoutId: data.data.id,
+      checkoutUrl,
+      checkoutId,
     });
   } catch (error) {
     console.error("Cart checkout error:", error);
