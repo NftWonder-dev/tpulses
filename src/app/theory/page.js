@@ -14,7 +14,7 @@ export default function TheoryPage() {
           </h1>
           <p className="text-slate-400 text-xl max-w-3xl mx-auto leading-relaxed">
             Understanding the science and philosophy behind musically-tuned
-            impulse responses
+            impulse responses.
           </p>
         </div>
 
