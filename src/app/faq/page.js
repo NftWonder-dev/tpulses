@@ -139,8 +139,8 @@ export default function FAQPage() {
                   each curve has a different decay feeling
                 </span>{" "}
                 that will adapt better to that BPM. We have built eight examples
-                on each product for you to choose the feeling that suits your
-                needs.
+                on each product for you to choose the feeling that better suits
+                your needs.
               </p>
             </div>
           </div>
