@@ -15,7 +15,7 @@ export default function Navigation() {
       setIsDownloading(true);
 
       // Replace with your actual test file key
-      const testFileKey = "products/test-product-1/test-product-1.zip";
+      const testFileKey = "products/free-pack/TRIMPulses_FreePack.zip";
 
       const response = await fetch("/api/download", {
         method: "POST",

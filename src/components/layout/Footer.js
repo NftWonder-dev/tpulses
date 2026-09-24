@@ -97,7 +97,7 @@ export default function Footer() {
 
       <div className="max-w-7xl mx-auto px-6 mt-20 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between gap-4">
         <span className="text-[10px] font-space-mono text-slate-600 uppercase">
-          &copy; 2026 TRIM Pulses Sound Studies.
+          &copy; 2026 TRIM Pulses Sound Studies
         </span>
       </div>
     </footer>
