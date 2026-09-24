@@ -67,14 +67,13 @@ export async function POST(request) {
     }
 
     const order = data.data;
-    const checkoutId = order.attributes.checkout_id; // Get checkout ID from order
+    const firstVariantId = order.attributes.first_order_item?.variant_id;
 
     console.log("Order created:", order.id);
     console.log("Checkout ID:", checkoutId);
 
     // Get cart from Redis
-    const cartData = await getCartFromRedis(checkoutId);
-
+    const cartData = await getCartFromRedis(`cart:${firstVariantId}`);
     if (!cartData) {
       console.error("Cart not found in Redis for checkout:", checkoutId);
       return NextResponse.json(

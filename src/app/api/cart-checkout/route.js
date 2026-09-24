@@ -109,7 +109,7 @@ export async function POST(request) {
     console.log("Checkout created:", checkoutId);
 
     // Store cart in Redis with checkoutId as key (expires in 24 hours)
-    const redisKey = `checkout:${checkoutId}`;
+    const redisKey = `cart:${cartItems[0].lemonsqueezyVariantId}`;
     const cartData = {
       cartItems,
       customerEmail,
