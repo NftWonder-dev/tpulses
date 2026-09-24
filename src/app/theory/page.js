@@ -197,9 +197,9 @@ export default function TheoryPage() {
                 <li className="flex items-start gap-3">
                   <span className="text-cyan-400 mt-1">•</span>
                   <span>
-                    Dual-Perspective Spatiality: Impulses include Stereo and M/S
-                    (Mid-Side) processing allowing independent decay behaviors
-                    in the center, side and surround stereo fields.
+                    Dual-Perspective Spatiality: Many impulses include Stereo
+                    and M/S (Mid-Side) processing allowing independent decay
+                    behaviors in the center, side and surround stereo fields.
                   </span>
                 </li>
               </ul>
