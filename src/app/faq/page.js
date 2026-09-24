@@ -47,12 +47,10 @@ export default function FAQPage() {
               </h3>
               <p className="text-slate-300 leading-relaxed">
                 To ensure total tonal harmony with your mix. Each impulse is
-                tuned to a specific root note and is available in{" "}
-                <span className="font-bold text-white">
-                  Major and Minor folders
-                </span>
-                . By choosing the IR that matches the key of your song, you
-                avoid the dissonant "mud" often caused by untuned reverb tails.
+                tuned to a specific root note and is available in different
+                chords. By choosing the IR that matches the key of your song,
+                you avoid the dissonant "mud" often caused by untuned reverb
+                tails.
               </p>
             </div>
 
