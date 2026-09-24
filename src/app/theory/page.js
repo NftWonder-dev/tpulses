@@ -151,7 +151,7 @@ export default function TheoryPage() {
                   Some collections use the "ISO" principle, where the frequency
                   energy of each decay band is kept constant, ensuring that no
                   specific frequency range "piles up" or masks others during
-                  long decay times.
+                  decay times.
                 </li>
               </ul>
             </div>
@@ -167,8 +167,8 @@ export default function TheoryPage() {
                   <span>
                     Geometric Decay Curves with Magic Numbers: Moving beyond
                     natural room physics, the IR utilizes mathematical equations
-                    (Astroid, Logarithmic, Parabolic, etc.) to define contant
-                    energy dissipation.
+                    (Logarithmic, Bézier, S-Curve, Semicubical, etc.) to define
+                    contant energy dissipation.
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
