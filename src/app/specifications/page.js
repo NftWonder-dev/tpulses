@@ -155,8 +155,8 @@ export default function SpecificationsPage() {
                     <span className="text-cyan-400 mt-1">•</span>
                     <span>
                       <strong className="text-white">DIM (Diminished)</strong> -
-                      Diminished tonality offering tension and instability.
-                      Ideal for dramatic transitions and experimental
+                      Diminished tonality offering tension and frequency
+                      balance. Ideal for dramatic transitions and experimental
                       soundscapes.
                     </span>
                   </li>
