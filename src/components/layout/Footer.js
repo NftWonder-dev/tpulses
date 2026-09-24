@@ -21,6 +21,9 @@ export default function Footer() {
           <div className="flex gap-4">
             <a
               href="#"
+              href="https://www.instagram.com/TRIMPulses"
+              target="_blank"
+              rel="noopener noreferrer"
               className="p-2 bg-white/5 rounded-full hover:bg-cyan-500/20 hover:text-cyan-400 transition-colors"
             >
               <Instagram className="w-4 h-4" />
