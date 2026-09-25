@@ -7,7 +7,7 @@ import { Trash2, ArrowLeft, ShoppingCart } from 'lucide-react';
 import { useState } from 'react';
 
 export default function CartPage() {
-  const { cart, removeFromCart, updateQuantity, getCartTotal, clearCart } = useCart();
+  const { cart, isCartLoaded, removeFromCart, updateQuantity, getCartTotal, clearCart } = useCart();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
 
   const handleClearCart = () => {
@@ -50,6 +50,11 @@ export default function CartPage() {
       setIsCheckingOut(false);
     }
   };
+
+  // Wait for the saved cart so "empty" doesn't flash before items appear.
+  if (!isCartLoaded) {
+    return <div className="min-h-screen pt-32 pb-20" />;
+  }
 
   if (cart.length === 0) {
     return (
