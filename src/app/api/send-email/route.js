@@ -185,7 +185,7 @@ export async function POST(request) {
 
     // Send email
     const { data, error } = await resend.emails.send({
-      from: "Trim Pulses <onboarding@resend.dev>",
+      from: "Trim Pulses <orders@trimpulses.com>",
       to: [customerEmail],
       subject: `Your Purchase: ${products.length} ${products.length === 1 ? "Product" : "Products"} - Download Ready!`,
       html: htmlContent,
