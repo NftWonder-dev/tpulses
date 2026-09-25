@@ -7,6 +7,15 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(request) {
   try {
+    // Only the LemonSqueezy webhook may trigger download emails.
+    const internalSecret = process.env.LEMONSQUEEZY_WEBHOOK_SECRET;
+    if (
+      !internalSecret ||
+      request.headers.get("x-internal-secret") !== internalSecret
+    ) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const {
       customerEmail,
       customerName,

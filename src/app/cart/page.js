@@ -29,12 +29,8 @@ export default function CartPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          cartItems: cart.map(item => ({
-            lemonsqueezyVariantId: item.lemonsqueezyVariantId,
-            name: item.name,
-            fileUrl: item.fileUrl,
-            price: item.price,
-          })),
+          // Only IDs are sent. The server looks up prices itself.
+          productIds: cart.map(item => item._id),
           customerEmail: '', // Optional pre-fill
         }),
       });

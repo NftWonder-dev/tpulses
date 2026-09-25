@@ -1,43 +1,72 @@
 // app/api/cart-checkout/route.js
 import { NextResponse } from "next/server";
+import { client } from "@/lib/sanity";
 
 const LEMONSQUEEZY_API_KEY = process.env.LEMONSQUEEZY_API_KEY;
 const LEMONSQUEEZY_STORE_ID = process.env.LEMONSQUEEZY_STORE_ID;
+// Generic "Trim Pulses order" variant used for every cart checkout.
+// Falls back to the first product's variant until it is configured.
+const LEMONSQUEEZY_CART_VARIANT_ID = process.env.LEMONSQUEEZY_CART_VARIANT_ID;
 
 export async function POST(request) {
   try {
-    const { cartItems, customerEmail } = await request.json();
+    const { productIds, customerEmail } = await request.json();
 
-    console.log("Cart items received:", cartItems);
-
-    if (!cartItems || cartItems.length === 0) {
+    if (!Array.isArray(productIds) || productIds.length === 0) {
       return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
     }
 
-    // Check if variant IDs exist
-    const missingVariantId = cartItems.find(
-      (item) => !item.lemonsqueezyVariantId,
+    // Each digital product is charged once, however many times it is in the cart.
+    const uniqueIds = [...new Set(productIds.filter((id) => typeof id === "string"))];
+
+    // Prices come from Sanity, never from the browser.
+    const products = await client.fetch(
+      `*[_type == "product" && _id in $ids] { _id, name, price, lemonsqueezyVariantId }`,
+      { ids: uniqueIds },
     );
-    if (missingVariantId) {
-      console.error("Product missing variant ID:", missingVariantId);
+
+    if (products.length !== uniqueIds.length) {
       return NextResponse.json(
-        {
-          error: `Product "${missingVariantId.name}" is missing LemonSqueezy Variant ID in Sanity`,
-        },
+        { error: "Some products in your cart are no longer available" },
         { status: 400 },
       );
     }
 
-    // Calculate total price for all products
-    const totalPrice = cartItems.reduce((sum, item) => sum + item.price, 0);
+    const invalid = products.find(
+      (p) => typeof p.price !== "number" || p.price <= 0,
+    );
+    if (invalid) {
+      console.error("Product has no valid price:", invalid);
+      return NextResponse.json(
+        { error: `Product "${invalid.name}" has no valid price` },
+        { status: 400 },
+      );
+    }
 
-    console.log("Total price:", totalPrice);
-    console.log(
-      "Cart items:",
-      cartItems.map((i) => ({ name: i.name, price: i.price })),
+    const variantId =
+      LEMONSQUEEZY_CART_VARIANT_ID ||
+      products.find((p) => p.lemonsqueezyVariantId)?.lemonsqueezyVariantId;
+
+    if (!variantId) {
+      console.error("No LemonSqueezy variant available for checkout");
+      return NextResponse.json(
+        { error: "Checkout is not configured" },
+        { status: 500 },
+      );
+    }
+
+    const totalCents = products.reduce(
+      (sum, p) => sum + Math.round(p.price * 100),
+      0,
     );
 
-    // Build checkout request
+    console.log(
+      "Checkout:",
+      products.map((p) => ({ id: p._id, name: p.name, price: p.price })),
+      "Total cents:",
+      totalCents,
+    );
+
     const requestBody = {
       data: {
         type: "checkouts",
@@ -49,8 +78,12 @@ export async function POST(request) {
           },
           checkout_data: {
             email: customerEmail || undefined,
+            // Read back by the webhook to know which files to deliver.
+            custom: {
+              product_ids: products.map((p) => p._id).join(","),
+            },
           },
-          custom_price: Math.round(totalPrice * 100), // in cents
+          custom_price: totalCents,
           product_options: {
             redirect_url: "https://trimpulses.com/order-success",
           },
@@ -65,17 +98,12 @@ export async function POST(request) {
           variant: {
             data: {
               type: "variants",
-              id: cartItems[0].lemonsqueezyVariantId.toString(),
+              id: variantId.toString(),
             },
           },
         },
       },
     };
-
-    console.log(
-      "Sending to LemonSqueezy:",
-      JSON.stringify(requestBody, null, 2),
-    );
 
     const response = await fetch("https://api.lemonsqueezy.com/v1/checkouts", {
       method: "POST",
@@ -88,8 +116,6 @@ export async function POST(request) {
     });
 
     const data = await response.json();
-
-    console.log("LemonSqueezy response:", data);
 
     if (!response.ok) {
       console.error("LemonSqueezy error:", data);

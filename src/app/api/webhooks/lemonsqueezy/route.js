@@ -38,46 +38,94 @@ export async function POST(request) {
     const customerName = order.attributes.user_name || "Customer"; // ← ADD THIS
     const orderTotal = (order.attributes.total / 100).toFixed(2); // ← ADD THIS
     const variantId = order.attributes.first_order_item?.variant_id;
+    const customProductIds = data.meta.custom_data?.product_ids;
 
     console.log("✅ Order ID:", order.id);
     console.log("📧 Email:", customerEmail);
     console.log("👤 Name:", customerName);
     console.log("💰 Total:", orderTotal);
     console.log("🔍 Variant ID:", variantId);
+    console.log("🛒 Cart product IDs:", customProductIds);
 
-    if (!variantId) {
-      console.error("❌ No variant ID");
-      return NextResponse.json({ error: "No variant ID" }, { status: 400 });
+    let products;
+
+    if (customProductIds) {
+      // Cart checkout: the product list was set by /api/cart-checkout.
+      const ids = [...new Set(customProductIds.split(",").filter(Boolean))];
+
+      console.log("📌 Querying Sanity for cart products...");
+      products = await client.fetch(
+        `*[_type == "product" && _id in $ids] { _id, name, price, fileUrl }`,
+        { ids },
+      );
+
+      if (products.length !== ids.length) {
+        console.error("❌ Some cart products not found in Sanity:", ids);
+        return NextResponse.json({ error: "Product not found" }, { status: 404 });
+      }
+
+      // Checkout links can carry extra custom data, so make sure the amount
+      // paid (before discounts and tax) covers every product we deliver.
+      const expectedCents = products.reduce(
+        (sum, p) => sum + Math.round((p.price || 0) * 100),
+        0,
+      );
+      if (order.attributes.subtotal < expectedCents) {
+        console.error(
+          "❌ Paid subtotal does not cover products:",
+          order.attributes.subtotal,
+          "<",
+          expectedCents,
+        );
+        return NextResponse.json({ error: "Amount mismatch" }, { status: 400 });
+      }
+    } else {
+      // Single-product checkout: look the product up by its variant.
+      if (!variantId) {
+        console.error("❌ No variant ID");
+        return NextResponse.json({ error: "No variant ID" }, { status: 400 });
+      }
+
+      console.log("📌 Querying Sanity...");
+      const product = await client.fetch(
+        `*[_type == "product" && lemonsqueezyVariantId == $variantId][0] { name, fileUrl }`,
+        { variantId: variantId.toString() },
+      );
+
+      if (!product) {
+        console.error("❌ Product not found in Sanity");
+        return NextResponse.json({ error: "Product not found" }, { status: 404 });
+      }
+
+      products = [product];
     }
 
-    // Query Sanity
-    console.log("📌 Querying Sanity...");
-    const product = await client.fetch(
-      `*[_type == "product" && lemonsqueezyVariantId == $variantId][0] { name, fileUrl }`,
-      { variantId: variantId.toString() },
+    const missingFile = products.find((p) => !p.fileUrl);
+    if (missingFile) {
+      console.error("❌ Product has no file:", missingFile.name);
+      return NextResponse.json({ error: "Product file missing" }, { status: 500 });
+    }
+
+    console.log(
+      "✅ Delivering:",
+      products.map((p) => `${p.name} (${p.fileUrl})`).join(", "),
     );
-
-    if (!product) {
-      console.error("❌ Product not found in Sanity");
-      return NextResponse.json({ error: "Product not found" }, { status: 404 });
-    }
-
-    console.log("✅ Found product:", product.name, "File:", product.fileUrl);
 
     // Send email with CORRECT FORMAT
     console.log("📤 Sending email...");
-    const emailResponse = await fetch("https://trimpulses.com/api/send-email", {
+    const emailResponse = await fetch("https://www.trimpulses.com/api/send-email", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-internal-secret": WEBHOOK_SECRET,
+      },
       body: JSON.stringify({
         customerEmail,
         customerName, // ← NOW INCLUDED
-        products: [
-          {
-            name: product.name,
-            fileKey: product.fileUrl, // ← Changed from downloadUrl to fileKey
-          },
-        ],
+        products: products.map((p) => ({
+          name: p.name,
+          fileKey: p.fileUrl,
+        })),
         orderTotal, // ← NOW INCLUDED
       }),
     });
