@@ -34,7 +34,7 @@ export async function POST(request) {
     }
 
     const order = data.data;
-    const customerEmail = order.attributes.customer_email;
+    const customerEmail = order.attributes.user_email;
     const customerName = order.attributes.user_name || "Customer"; // ← ADD THIS
     const orderTotal = (order.attributes.total / 100).toFixed(2); // ← ADD THIS
     const variantId = order.attributes.first_order_item?.variant_id;
