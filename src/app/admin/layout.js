@@ -3,26 +3,23 @@
 // and deliberately opts OUT of the Navigation/Footer/PasswordProtection
 // that wraps the public site.
 
-import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
+import { ADMIN_COOKIE, verifyAdminToken } from "@/lib/adminAuth";
 
-// Very simple cookie-based admin auth.
-// Set ADMIN_PASSWORD env var (defaults to "TrimAdmin2024" if not set).
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "TrimAdmin2024";
-const COOKIE_NAME = "tp_admin_auth";
+// Cookie-based admin auth. Requires the ADMIN_PASSWORD env var;
+// without it nobody can log in.
 
 export const metadata = {
   title: "Admin · Trim Pulses",
   robots: { index: false, follow: false },
 };
 
-export default function AdminLayout({ children }) {
-  // Check cookie server-side
-  const cookieStore = cookies();
-  const auth = cookieStore.get(COOKIE_NAME);
+export default async function AdminLayout({ children }) {
+  // Check the signed session cookie server-side
+  const token = cookies().get(ADMIN_COOKIE)?.value;
 
   // If not authenticated, render the login page inline
-  if (!auth || auth.value !== ADMIN_PASSWORD) {
+  if (!(await verifyAdminToken(token))) {
     return <AdminLogin />;
   }
 

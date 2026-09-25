@@ -1,23 +1,31 @@
 // app/api/admin/auth/route.js
 // Handles admin login form submission and sets a session cookie.
 import { NextResponse } from 'next/server'
-
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'TrimAdmin2024'
-const COOKIE_NAME = 'tp_admin_auth'
+import {
+  ADMIN_COOKIE,
+  ADMIN_SESSION_SECONDS,
+  checkAdminPassword,
+  createAdminToken,
+} from '@/lib/adminAuth'
 
 export async function POST(request) {
   try {
     const formData = await request.formData()
     const password = formData.get('password')
-    const redirectTo = formData.get('redirect') || '/admin'
+    // Only redirect within the admin area, never to another site.
+    const requested = formData.get('redirect')
+    const redirectTo =
+      typeof requested === 'string' && requested.startsWith('/admin')
+        ? requested
+        : '/admin'
 
-    if (password === ADMIN_PASSWORD) {
+    if (checkAdminPassword(password)) {
       const response = NextResponse.redirect(new URL(redirectTo, request.url))
-      response.cookies.set(COOKIE_NAME, ADMIN_PASSWORD, {
+      response.cookies.set(ADMIN_COOKIE, await createAdminToken(), {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
-        maxAge: 60 * 60 * 8, // 8 hours
+        maxAge: ADMIN_SESSION_SECONDS,
         path: '/',
       })
       return response
@@ -37,7 +45,7 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url)
   if (searchParams.get('action') === 'logout') {
     const response = NextResponse.redirect(new URL('/admin', request.url))
-    response.cookies.delete(COOKIE_NAME)
+    response.cookies.delete(ADMIN_COOKIE)
     return response
   }
   return NextResponse.json({ error: 'Method not allowed' }, { status: 405 })
