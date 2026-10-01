@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Mail, ArrowRight, CheckCircle2, AlertCircle } from "lucide-react";
 
-export default function AccountLoginForm() {
+export default function AccountLoginForm({ linkExpired = false }) {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState("idle"); // idle | sending | sent | error
 
@@ -11,11 +11,16 @@ export default function AccountLoginForm() {
     e.preventDefault();
     setStatus("sending");
 
-    // TODO (next step): call the API that emails the login link, e.g.
-    // await fetch("/api/account/login", { method: "POST", body: JSON.stringify({ email }) })
-    // For now this only shows the confirmation screen.
-    await new Promise((resolve) => setTimeout(resolve, 600));
-    setStatus("sent");
+    try {
+      const response = await fetch("/api/account/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      setStatus(response.ok ? "sent" : "error");
+    } catch {
+      setStatus("error");
+    }
   };
 
   if (status === "sent") {
@@ -27,7 +32,8 @@ export default function AccountLoginForm() {
         </h2>
         <p className="text-slate-400 leading-relaxed mb-6">
           If <span className="text-white">{email}</span> has a Trim Pulses
-          account, a login link is on its way. The link is valid for 15 minutes.
+          account, a login link is on its way. The link is valid for 15
+          minutes.
         </p>
         <button
           onClick={() => {
@@ -50,6 +56,17 @@ export default function AccountLoginForm() {
       <p className="text-slate-400 mb-8">
         Enter the email address you used when purchasing.
       </p>
+
+      {(linkExpired || status === "error") && (
+        <div className="flex items-start gap-3 border border-magenta-500/30 bg-magenta-500/5 rounded-xl p-4 mb-6">
+          <AlertCircle className="w-5 h-5 text-magenta-500 shrink-0 mt-0.5" />
+          <p className="text-sm text-slate-300">
+            {status === "error"
+              ? "Something went wrong sending your login link. Please try again."
+              : "That login link has expired or is invalid. Enter your email to get a new one."}
+          </p>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="relative">

@@ -4,7 +4,8 @@ import { client } from "@/lib/sanity";
 
 export const writeClient = client.withConfig({
   token: process.env.SANITY_API_WRITE_TOKEN,
-  useCdn: false, // always read fresh data when writing
+  useCdn: false, // always read fresh data
+  perspective: "raw", // make sure the private "orders.*" documents are included
 });
 
 // Saves a purchase as an order document.
@@ -33,4 +34,40 @@ export async function saveOrder({ lsOrder, customerEmail, customerName, products
     testMode: Boolean(attrs.test_mode),
     purchasedAt: attrs.created_at,
   });
+}
+
+// True if this email has bought at least once (i.e. has an account).
+export async function customerExists(email) {
+  const count = await writeClient.fetch(
+    `count(*[_type == "order" && customerEmail == $email])`,
+    { email },
+  );
+  return count > 0;
+}
+
+// All orders for a customer, newest first, with product details.
+export async function getOrdersByEmail(email) {
+  return writeClient.fetch(
+    `*[_type == "order" && customerEmail == $email] | order(purchasedAt desc) {
+      _id,
+      orderNumber,
+      purchasedAt,
+      total,
+      currency,
+      testMode,
+      customerName,
+      "products": products[]->{ _id, name, "slug": slug.current }
+    }`,
+    { email },
+  );
+}
+
+// Returns the product's file key only if this customer actually bought it.
+export async function getOwnedProductFile(email, productId) {
+  return writeClient.fetch(
+    `*[_type == "product" && _id == $productId
+       && count(*[_type == "order" && customerEmail == $email && references(^._id)]) > 0
+     ][0]{ name, fileUrl }`,
+    { email, productId },
+  );
 }

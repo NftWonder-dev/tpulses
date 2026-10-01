@@ -1,4 +1,10 @@
+import { cookies } from "next/headers";
 import AccountLoginForm from "@/components/account/AccountLoginForm";
+import AccountDashboard from "@/components/account/AccountDashboard";
+import { getSessionEmail } from "@/lib/session";
+import { getOrdersByEmail } from "@/lib/sanityWrite";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "My Account | Trim Pulses",
@@ -21,7 +27,11 @@ const infoBlocks = [
   },
 ];
 
-export default function AccountPage() {
+export default async function AccountPage({ searchParams }) {
+  const email = getSessionEmail(cookies());
+  const orders = email ? await getOrdersByEmail(email) : null;
+  const loggedIn = Boolean(email && orders?.length);
+
   return (
     <main className="min-h-screen pt-32 pb-24">
       {/* Header */}
@@ -36,26 +46,31 @@ export default function AccountPage() {
         </div>
       </section>
 
-      {/* Login */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-6">
-          <AccountLoginForm />
+          {loggedIn ? (
+            <AccountDashboard email={email} orders={orders} />
+          ) : (
+            <AccountLoginForm linkExpired={searchParams?.error === "expired"} />
+          )}
         </div>
       </section>
 
-      {/* Info blocks */}
-      <section className="border-t border-white/5 pt-16">
-        <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-3 gap-12">
-          {infoBlocks.map((block) => (
-            <div key={block.title}>
-              <h2 className="font-space-grotesk text-2xl font-bold mb-4">
-                {block.title}
-              </h2>
-              <p className="text-slate-400 leading-relaxed">{block.text}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      {/* Info blocks (only before login) */}
+      {!loggedIn && (
+        <section className="border-t border-white/5 pt-16">
+          <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-3 gap-12">
+            {infoBlocks.map((block) => (
+              <div key={block.title}>
+                <h2 className="font-space-grotesk text-2xl font-bold mb-4">
+                  {block.title}
+                </h2>
+                <p className="text-slate-400 leading-relaxed">{block.text}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
     </main>
   );
 }
