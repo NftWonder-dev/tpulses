@@ -12,7 +12,9 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://trimpulses.com";
 export async function POST(request) {
   try {
     const { email } = await request.json();
-    const cleanEmail = String(email || "").trim().toLowerCase();
+    const cleanEmail = String(email || "")
+      .trim()
+      .toLowerCase();
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
       return NextResponse.json({ error: "Invalid email" }, { status: 400 });
@@ -30,7 +32,7 @@ export async function POST(request) {
     const loginUrl = `${BASE_URL}/api/account/verify?token=${encodeURIComponent(token)}`;
 
     const { error } = await resend.emails.send({
-      from: "Trim Pulses <onboarding@resend.dev>",
+      from: "Trim Pulses <account@trimpulses.com>",
       to: [cleanEmail],
       subject: "Your Trim Pulses login link",
       html: `
@@ -48,13 +50,19 @@ export async function POST(request) {
 
     if (error) {
       console.error("❌ Login email failed:", error);
-      return NextResponse.json({ error: "Could not send email" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Could not send email" },
+        { status: 500 },
+      );
     }
 
     console.log("🔐 Login link sent");
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("❌ Login error:", error.message);
-    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Something went wrong" },
+      { status: 500 },
+    );
   }
 }
