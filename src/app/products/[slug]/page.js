@@ -117,7 +117,7 @@ export default async function ProductPage({ params }) {
                   Price
                 </span>
                 <span className="text-2xl font-bold text-white font-space-mono">
-                  ${product.price}
+                  €{product.price}
                 </span>
               </div>
               <AddToCartButton product={product} />

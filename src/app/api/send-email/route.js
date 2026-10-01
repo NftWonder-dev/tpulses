@@ -172,7 +172,7 @@ export async function POST(request) {
   `,
     )
     .join("")}
-  <p style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e2e8f0; text-align: center;"><strong>Total:</strong> $${orderTotal}</p>
+  <p style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e2e8f0; text-align: center;"><strong>Total:</strong> €${orderTotal}</p>
 </div>
               
               <div class="card">

@@ -94,7 +94,7 @@ export default function ProductCard({ product }) {
             {/* Price and Button */}
             <div className="flex items-center gap-3 pt-3 border-t border-white/5">
               <span className="font-space-mono text-xl font-bold text-white">
-                ${price}
+                €{price}
               </span>
               <button
                 onClick={handleAddToCart}
