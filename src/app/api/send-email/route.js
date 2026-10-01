@@ -152,11 +152,15 @@ export async function POST(request) {
                 ${productListHtml}
                 
                 <div class="info-box">
-                  <p>
-                    <strong>Important:</strong> These download links will expire in 24 hours. 
-                    Please download your files as soon as possible.
-                  </p>
-                </div>
+  <p>
+    <strong>Important:</strong> These download links will expire in 24 hours.
+  </p>
+  <p style="margin-top: 8px;">
+    Need them again later? Your purchases are always available in your account at
+    <a href="https://trimpulses.com/account" style="color: #0891b2; font-weight: bold;">trimpulses.com/account</a>.
+    Just log in with this email address, no password needed.
+  </p>
+</div>
               </div>
               
               <div class="card">
