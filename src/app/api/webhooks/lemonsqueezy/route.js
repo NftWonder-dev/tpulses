@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { client } from "@/lib/sanity";
+import { saveOrder } from "@/lib/sanityWrite";
 
 const WEBHOOK_SECRET = process.env.LEMONSQUEEZY_WEBHOOK_SECRET;
 
@@ -35,8 +36,8 @@ export async function POST(request) {
 
     const order = data.data;
     const customerEmail = order.attributes.user_email;
-    const customerName = order.attributes.user_name || "Customer"; // ← ADD THIS
-    const orderTotal = (order.attributes.total / 100).toFixed(2); // ← ADD THIS
+    const customerName = order.attributes.user_name || "Customer";
+    const orderTotal = (order.attributes.total / 100).toFixed(2);
     const variantId = order.attributes.first_order_item?.variant_id;
     const customProductIds = data.meta.custom_data?.product_ids;
 
@@ -61,7 +62,10 @@ export async function POST(request) {
 
       if (products.length !== ids.length) {
         console.error("❌ Some cart products not found in Sanity:", ids);
-        return NextResponse.json({ error: "Product not found" }, { status: 404 });
+        return NextResponse.json(
+          { error: "Product not found" },
+          { status: 404 },
+        );
       }
 
       // Checkout links can carry extra custom data, so make sure the amount
@@ -88,13 +92,17 @@ export async function POST(request) {
 
       console.log("📌 Querying Sanity...");
       const product = await client.fetch(
-        `*[_type == "product" && lemonsqueezyVariantId == $variantId][0] { name, fileUrl }`,
+        // CHANGED: now also fetches _id, so the order can reference the product
+        `*[_type == "product" && lemonsqueezyVariantId == $variantId][0] { _id, name, fileUrl }`,
         { variantId: variantId.toString() },
       );
 
       if (!product) {
         console.error("❌ Product not found in Sanity");
-        return NextResponse.json({ error: "Product not found" }, { status: 404 });
+        return NextResponse.json(
+          { error: "Product not found" },
+          { status: 404 },
+        );
       }
 
       products = [product];
@@ -103,7 +111,10 @@ export async function POST(request) {
     const missingFile = products.find((p) => !p.fileUrl);
     if (missingFile) {
       console.error("❌ Product has no file:", missingFile.name);
-      return NextResponse.json({ error: "Product file missing" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Product file missing" },
+        { status: 500 },
+      );
     }
 
     console.log(
@@ -111,24 +122,26 @@ export async function POST(request) {
       products.map((p) => `${p.name} (${p.fileUrl})`).join(", "),
     );
 
-    // Send email with CORRECT FORMAT
     console.log("📤 Sending email...");
-    const emailResponse = await fetch("https://www.trimpulses.com/api/send-email", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-internal-secret": WEBHOOK_SECRET,
+    const emailResponse = await fetch(
+      "https://www.trimpulses.com/api/send-email",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-internal-secret": WEBHOOK_SECRET,
+        },
+        body: JSON.stringify({
+          customerEmail,
+          customerName,
+          products: products.map((p) => ({
+            name: p.name,
+            fileKey: p.fileUrl,
+          })),
+          orderTotal,
+        }),
       },
-      body: JSON.stringify({
-        customerEmail,
-        customerName, // ← NOW INCLUDED
-        products: products.map((p) => ({
-          name: p.name,
-          fileKey: p.fileUrl,
-        })),
-        orderTotal, // ← NOW INCLUDED
-      }),
-    });
+    );
 
     if (!emailResponse.ok) {
       const errorText = await emailResponse.text();
@@ -137,6 +150,22 @@ export async function POST(request) {
     }
 
     console.log("✅ Email sent successfully");
+
+    // NEW: save the order for the customer account.
+    // Wrapped in its own try/catch: if this fails, the customer already has
+    // their email, so we log the problem and still answer 200 to LemonSqueezy.
+    try {
+      await saveOrder({
+        lsOrder: order,
+        customerEmail,
+        customerName,
+        products,
+      });
+      console.log("💾 Order saved to Sanity");
+    } catch (saveError) {
+      console.error("⚠️ Order NOT saved to Sanity:", saveError.message);
+    }
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("❌ ERROR:", error.message);

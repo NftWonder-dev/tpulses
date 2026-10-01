@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { ShoppingCart, Activity, Menu, X } from "lucide-react";
+import { ShoppingCart, Activity, Menu, X, User } from "lucide-react";
+
 import { useState } from "react";
 import { useCart } from "@/context/CartContext";
 
@@ -94,6 +95,13 @@ export default function Navigation() {
           >
             {isDownloading ? "Loading..." : "Get Free Pack"}
           </button>
+          <Link
+            href="/account"
+            aria-label="My account"
+            className="p-2 rounded-full bg-white/5 hover:bg-cyan-500/20 group transition-colors"
+          >
+            <User className="w-5 h-5 text-slate-300 group-hover:text-cyan-400 transition-colors" />
+          </Link>
         </div>
 
         {/* Mobile Menu Button & Cart */}
@@ -116,6 +124,13 @@ export default function Navigation() {
               <Menu className="w-6 h-6" />
             )}
           </button>
+          <Link
+            href="/account"
+            aria-label="My account"
+            className="p-2 rounded-full bg-white/5 hover:bg-cyan-500/20 group transition-colors"
+          >
+            <User className="w-5 h-5 text-slate-300 group-hover:text-cyan-400 transition-colors" />
+          </Link>
         </div>
       </div>
 
