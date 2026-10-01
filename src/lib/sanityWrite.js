@@ -1,5 +1,6 @@
 // Server-only Sanity client with write access.
 // NEVER import this file from a "use client" component: the token must stay on the server.
+import crypto from "crypto";
 import { client } from "@/lib/sanity";
 
 export const writeClient = client.withConfig({
@@ -70,4 +71,23 @@ export async function getOwnedProductFile(email, productId) {
      ][0]{ name, fileUrl }`,
     { email, productId },
   );
+}
+
+// ---------- Customer profile (editable name) ----------
+// One private document per customer. The ID uses a hash of the email so it
+// is a valid Sanity ID, and starts with "customers." so it stays private.
+function customerDocId(email) {
+  const hash = crypto.createHash("sha256").update(email).digest("hex").slice(0, 32);
+  return `customers.${hash}`;
+}
+
+// Returns the name the customer set in their account, or null.
+export async function getCustomerName(email) {
+  return writeClient.fetch(`*[_id == $id][0].name`, { id: customerDocId(email) });
+}
+
+export async function setCustomerName(email, name) {
+  const id = customerDocId(email);
+  await writeClient.createIfNotExists({ _id: id, _type: "customer", email });
+  return writeClient.patch(id).set({ name }).commit();
 }

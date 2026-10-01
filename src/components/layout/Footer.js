@@ -48,7 +48,7 @@ export default function Footer() {
                 href="/collections"
                 className="hover:text-cyan-400 transition-colors"
               >
-                All Collections.
+                All Collections
               </Link>
             </li>
             <li>

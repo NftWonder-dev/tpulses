@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Download, LogOut, User } from "lucide-react";
+import { Download, LogOut, User, Pencil, Check, X } from "lucide-react";
 
 function formatDate(iso) {
   return iso
@@ -46,8 +46,90 @@ function DownloadButton({ productId, name }) {
   );
 }
 
-export default function AccountDashboard({ email, orders }) {
-  const name = orders[0]?.customerName;
+function NameEditor({ initialName }) {
+  const [name, setName] = useState(initialName);
+  const [draft, setDraft] = useState(initialName);
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  const save = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    setError("");
+    try {
+      const response = await fetch("/api/account/name", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: draft }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Couldn't save");
+      setName(data.name);
+      setEditing(false);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (editing) {
+    return (
+      <form onSubmit={save} className="mb-1">
+        <div className="flex items-center gap-2">
+          <input
+            autoFocus
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            maxLength={80}
+            placeholder="Your name"
+            className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500/60"
+          />
+          <button
+            type="submit"
+            disabled={saving}
+            aria-label="Save name"
+            className="p-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-black disabled:opacity-50"
+          >
+            <Check className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setDraft(name);
+              setEditing(false);
+              setError("");
+            }}
+            aria-label="Cancel"
+            className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        {error && <p className="text-magenta-500 text-xs mt-2">{error}</p>}
+      </form>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-2 mb-1">
+      <p className="text-white">{name || "Add your name"}</p>
+      <button
+        onClick={() => {
+          setDraft(name);
+          setEditing(true);
+        }}
+        aria-label="Edit name"
+        className="p-1 rounded text-slate-500 hover:text-cyan-400 transition-colors"
+      >
+        <Pencil className="w-4 h-4" />
+      </button>
+    </div>
+  );
+}
+
+export default function AccountDashboard({ email, name, orders }) {
 
   return (
     <div className="grid lg:grid-cols-3 gap-12">
@@ -108,7 +190,7 @@ export default function AccountDashboard({ email, orders }) {
           <h2 className="font-space-grotesk text-xl font-bold mb-4">
             Your details
           </h2>
-          {name && <p className="text-white mb-1">{name}</p>}
+          <NameEditor initialName={name} />
           <p className="text-slate-400 text-sm break-all mb-6">{email}</p>
 
           <form action="/api/account/logout" method="POST">

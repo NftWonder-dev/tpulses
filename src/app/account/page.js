@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import AccountLoginForm from "@/components/account/AccountLoginForm";
 import AccountDashboard from "@/components/account/AccountDashboard";
 import { getSessionEmail } from "@/lib/session";
-import { getOrdersByEmail } from "@/lib/sanityWrite";
+import { getOrdersByEmail, getCustomerName } from "@/lib/sanityWrite";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +31,10 @@ export default async function AccountPage({ searchParams }) {
   const email = getSessionEmail(cookies());
   const orders = email ? await getOrdersByEmail(email) : null;
   const loggedIn = Boolean(email && orders?.length);
+  // Name the customer set themselves wins; otherwise use the name from their latest order.
+  const name = loggedIn
+    ? (await getCustomerName(email)) || orders[0]?.customerName || ""
+    : "";
 
   return (
     <main className="min-h-screen pt-32 pb-24">
@@ -49,7 +53,7 @@ export default async function AccountPage({ searchParams }) {
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-6">
           {loggedIn ? (
-            <AccountDashboard email={email} orders={orders} />
+            <AccountDashboard email={email} name={name} orders={orders} />
           ) : (
             <AccountLoginForm linkExpired={searchParams?.error === "expired"} />
           )}
