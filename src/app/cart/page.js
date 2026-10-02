@@ -223,8 +223,18 @@ export default function CartPage() {
                 {isCheckingOut ? "Processing..." : "Proceed to Checkout"}
               </button>
 
-              <p className="text-slate-400 text-xs text-center mb-3">
+              <p className="text-slate-400 text-xs text-center mb-1">
                 Secure payment by LemonSqueezy
+              </p>
+
+              <p className="text-slate-500 text-xs text-center mb-4">
+                By checking out you agree to our{" "}
+                <Link
+                  href="/terms"
+                  className="underline underline-offset-2 hover:text-cyan-400 transition-colors"
+                >
+                  Terms &amp; Refunds
+                </Link>
               </p>
 
               <Link

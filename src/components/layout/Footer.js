@@ -83,6 +83,22 @@ export default function Footer() {
                 IR Guide
               </Link>
             </li>
+            <li>
+              <Link
+                href="/privacy"
+                className="hover:text-cyan-400 transition-colors"
+              >
+                Privacy Policy
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/terms"
+                className="hover:text-cyan-400 transition-colors"
+              >
+                Terms &amp; Refunds
+              </Link>
+            </li>
           </ul>
         </div>
       </div>
