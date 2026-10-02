@@ -1,6 +1,10 @@
-import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { urlFor } from "@/lib/sanity";
+import {
+  urlFor,
+  categoryCardImageUrl,
+  productCardImageUrl,
+} from "@/lib/sanity";
+import PreloadLink from "@/components/ui/PreloadLink";
 
 export default function CollectionCard({ collection }) {
   console.log("Collection data:", collection);
@@ -11,10 +15,16 @@ export default function CollectionCard({ collection }) {
     description,
     image,
     categoryCount = 0,
+    preloadImages,
   } = collection;
 
+  // The collection page shows categories, or products when there are none
+  const preloadUrls = (preloadImages ?? []).map(
+    categoryCount > 0 ? categoryCardImageUrl : productCardImageUrl,
+  );
+
   return (
-    <Link href={`/collections/${slug.current}`}>
+    <PreloadLink href={`/collections/${slug.current}`} preloadUrls={preloadUrls}>
       <div className="glass-card rounded-xl group cursor-pointer relative overflow-hidden min-h-[400px] flex flex-col justify-end">
         {/* Faded Background Image - Top to Bottom */}
         {image && (
@@ -56,6 +66,6 @@ export default function CollectionCard({ collection }) {
           </div>
         </div>
       </div>
-    </Link>
+    </PreloadLink>
   );
 }

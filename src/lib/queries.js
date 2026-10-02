@@ -8,7 +8,14 @@ export const COLLECTIONS_QUERY = `*[_type == "collection"] | order(order asc) {
   description,
   image,
   order,
-  "categoryCount": count(*[_type == "category" && references(^._id)])
+  "categoryCount": count(*[_type == "category" && references(^._id)]),
+  // Images shown on the collection page (categories, or products when the
+  // collection has no categories). Preloaded when a CollectionCard is hovered.
+  "preloadImages": select(
+    count(*[_type == "category" && references(^._id)]) > 0 =>
+      *[_type == "category" && references(^._id) && defined(image.asset)] | order(order asc) [0...12].image,
+    *[_type == "product" && references(^._id) && defined(previewImages[0].asset)] | order(order asc) [0...12].previewImages[0]
+  )
 }`;
 
 export const COLLECTION_BY_SLUG_QUERY = `*[_type == "collection" && slug.current == $slug][0] {

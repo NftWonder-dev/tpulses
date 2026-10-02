@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { urlFor } from "@/lib/sanity";
+import { productCardImageUrl } from "@/lib/sanity";
 import { useCart } from "@/context/CartContext";
 import { useState } from "react";
 
@@ -109,7 +109,7 @@ export default function ProductCard({ product }) {
           {previewImages?.[0] && (
             <div className="w-40 flex-shrink-0 self-stretch">
               <img
-                src={urlFor(previewImages[0]).width(300).url()}
+                src={productCardImageUrl(previewImages[0])}
                 alt={name}
                 className="w-full h-full object-contain opacity-80 group-hover:opacity-100 transition-all duration-500"
               />
