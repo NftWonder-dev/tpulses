@@ -21,7 +21,7 @@ export default function CollectionCard({ collection }) {
           <div className="absolute inset-0 z-0">
             <div className="absolute inset-0 bg-gradient-to-r from-deep-bg via-deep-bg/80 to-transparent"></div>
             <img
-              src={urlFor(image).width(600).url()}
+              src={urlFor(image).width(1200).quality(90).url()}
               alt={name}
               className="w-full h-full object-cover opacity-70 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000 ease-out"
               style={{

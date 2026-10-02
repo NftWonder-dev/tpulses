@@ -13,7 +13,7 @@ export default function CategoryCard({ category }) {
           <div className="absolute inset-0 z-0">
             <div className="absolute inset-0 bg-gradient-to-r from-deep-bg via-deep-bg/80 to-transparent"></div>
             <img
-              src={urlFor(image).width(600).url()}
+              src={urlFor(image).width(600).quality(90).url()}
               alt={name}
               className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-all duration-500"
               style={{
