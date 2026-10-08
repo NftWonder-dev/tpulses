@@ -27,7 +27,7 @@ export default function VideoButton() {
         className="relative block w-full aspect-video group"
       >
         <img
-          src="https://img.youtube.com/vi/mqqft2x_Aa4/maxresdefault.jpg"
+          src="https://img.youtube.com/vi/i0rWx4WVdzU/maxresdefault.jpg"
           alt="Trim Pulses Explainer"
           className="w-full h-full object-cover"
         />
@@ -61,7 +61,7 @@ export default function VideoButton() {
             <iframe
               width="100%"
               height="100%"
-              src="https://www.youtube.com/embed/mqqft2x_Aa4?autoplay=1"
+              src="https://www.youtube.com/embed/i0rWx4WVdzU?autoplay=1"
               title="Trim Pulses Explainer"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
