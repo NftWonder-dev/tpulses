@@ -26,7 +26,7 @@ export default function TheoryPage() {
               <iframe
                 width="100%"
                 height="100%"
-                src="https://www.youtube.com/embed/mqqft2x_Aa4"
+                src="https://www.youtube.com/embed/i0rWx4WVdzU"
                 title="Theory Explanation"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
