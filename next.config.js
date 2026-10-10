@@ -10,6 +10,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "r2-bucket.flowith.net",
       },
+      {
+        protocol: "https",
+        hostname: "i.imgur.com",
+      },
     ],
   },
 };

@@ -1,4 +1,5 @@
 // app/specifications/page.js - Updated with actual folder structure
+import Image from "next/image";
 import Link from "next/link";
 
 export default function SpecificationsPage() {
@@ -65,19 +66,25 @@ export default function SpecificationsPage() {
               </ul>
             </div>
 
-            <img
-              src="https://i.imgur.com/cvxnKik.png"
+            <Image
+              src="/images/specs/sample-rate-folders.webp"
               alt="Sample Rate Folders"
-              className="w-full rounded-lg"
+              width={1232}
+              height={832}
+              unoptimized
+              className="w-full h-auto rounded-lg"
             />
           </div>
 
           {/* Tone Folders */}
           <div className="grid lg:grid-cols-2 gap-12 items-center mb-20">
-            <img
-              src="https://i.imgur.com/mTOhE8s.png"
+            <Image
+              src="/images/specs/semitone-folders.webp"
               alt="Twelve Semitone Folders"
-              className="w-full rounded-lg"
+              width={1232}
+              height={832}
+              unoptimized
+              className="w-full h-auto rounded-lg"
             />
 
             <div className="order-1 lg:order-2">
@@ -173,19 +180,25 @@ export default function SpecificationsPage() {
               </div>
             </div>
 
-            <img
-              src="https://i.imgur.com/JMGbgMe.png"
+            <Image
+              src="/images/specs/modal-variations.webp"
               alt="Modal Variations"
-              className="w-full rounded-lg"
+              width={1232}
+              height={824}
+              unoptimized
+              className="w-full h-auto rounded-lg"
             />
           </div>
 
           {/* Algorithmic Variations */}
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <img
-              src="https://i.imgur.com/ReiEZ8J.png"
+            <Image
+              src="/images/specs/algorithmic-variations.webp"
               alt="Algorithmic Variations"
-              className="w-full rounded-lg"
+              width={1232}
+              height={832}
+              unoptimized
+              className="w-full h-auto rounded-lg"
             />
 
             <div className="order-1 lg:order-2">
