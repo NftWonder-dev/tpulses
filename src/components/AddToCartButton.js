@@ -1,35 +1,25 @@
 "use client";
 
 import { useCart } from '@/context/CartContext';
+import Link from 'next/link';
 import { useState } from 'react';
 
 export default function AddToCartButton({ product }) {
-  const { addToCart, cart } = useCart();
-  const [showConfirm, setShowConfirm] = useState(false);
+  const { addToCart } = useCart();
+  const [showInCart, setShowInCart] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
   const handleAddToCart = () => {
-    // Check if item already exists in cart
-    const existingItem = cart.find(item => item._id === product._id);
-    
-    if (existingItem) {
-      // Show confirmation modal
-      setShowConfirm(true);
-    } else {
-      // Add directly and show success
-      addToCart(product);
+    // Each product can only be bought once, so it is never added twice.
+    if (addToCart(product)) {
       setShowSuccess(true);
+    } else {
+      setShowInCart(true);
     }
   };
 
-  const confirmAdd = () => {
-    addToCart(product);
-    setShowConfirm(false);
-    setShowSuccess(true);
-  };
-
-  const cancelAdd = () => {
-    setShowConfirm(false);
+  const closeInCart = () => {
+    setShowInCart(false);
   };
 
   const closeSuccess = () => {
@@ -45,30 +35,29 @@ export default function AddToCartButton({ product }) {
         Add to Cart
       </button>
 
-      {/* Confirmation Modal (Item Already Exists) */}
-      {showConfirm && (
+      {/* Already in Cart Modal */}
+      {showInCart && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-deep-bg border border-white/10 rounded-xl p-6 max-w-md w-full">
             <h3 className="font-space-grotesk text-xl font-bold mb-3">
-              Item Already in Cart
+              Already in Your Cart
             </h3>
             <p className="text-slate-400 mb-6">
-              <span className="text-white font-bold">{product.name}</span> is already in your cart. 
-              Do you want to increase the quantity?
+              <span className="text-white font-bold">{product.name}</span> is already in your cart.
             </p>
             <div className="flex gap-3">
               <button
-                onClick={cancelAdd}
+                onClick={closeInCart}
                 className="flex-1 bg-white/5 hover:bg-white/10 text-white py-3 rounded font-bold uppercase text-sm transition-all"
               >
-                Cancel
+                Close
               </button>
-              <button
-                onClick={confirmAdd}
-                className="flex-1 bg-cyan-500 hover:bg-cyan-400 text-black py-3 rounded font-bold uppercase text-sm transition-all"
+              <Link
+                href="/cart"
+                className="flex-1 bg-cyan-500 hover:bg-cyan-400 text-black py-3 rounded font-bold uppercase text-sm transition-all text-center"
               >
-                Add Anyway
-              </button>
+                View Cart
+              </Link>
             </div>
           </div>
         </div>

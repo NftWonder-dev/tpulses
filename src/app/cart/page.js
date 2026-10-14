@@ -2,20 +2,46 @@
 
 import { useCart } from "@/context/CartContext";
 import { urlFor } from "@/lib/sanity";
+import ProductPath from "@/components/ProductPath";
 import Link from "next/link";
 import { Trash2, ArrowLeft, ShoppingCart } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function CartPage() {
   const {
     cart,
     isCartLoaded,
     removeFromCart,
-    updateQuantity,
     getCartTotal,
     clearCart,
   } = useCart();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [paths, setPaths] = useState({});
+
+  // Collection › Category › Sub-Pack, looked up by the server once per set of
+  // products (older saved carts don't store it). While loading or on failure
+  // the names are shown without a path.
+  const cartIds = cart.map((item) => item._id).join(",");
+  useEffect(() => {
+    if (!cartIds) return;
+    let cancelled = false;
+    fetch("/api/cart-paths", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ productIds: cartIds.split(",") }),
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error();
+        return response.json();
+      })
+      .then((data) => {
+        if (!cancelled) setPaths(data);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [cartIds]);
 
   const handleClearCart = () => {
     if (
@@ -124,42 +150,19 @@ export default function CartPage() {
 
                   {/* Details */}
                   <div className="flex-1 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="flex-1">
-                      <h3 className="font-space-grotesk text-lg md:text-xl font-bold mb-1">
+                    <div className="flex-1 min-w-0">
+                      {paths[item._id] && (
+                        <ProductPath product={paths[item._id]} />
+                      )}
+                      <h3 className="font-space-grotesk text-lg md:text-xl font-bold">
                         {item.name}
                       </h3>
-                      <p className="text-slate-400 text-sm font-space-mono">
-                        €{item.price?.toFixed(2)}
-                      </p>
                     </div>
 
-                    {/* Quantity Controls */}
                     <div className="flex items-center gap-3 md:gap-4">
-                      <div className="flex items-center gap-2 bg-white/5 rounded px-2 py-1">
-                        <button
-                          onClick={() =>
-                            updateQuantity(item._id, item.quantity - 1)
-                          }
-                          className="w-7 h-7 bg-white/5 hover:bg-white/10 rounded flex items-center justify-center transition-colors text-sm"
-                        >
-                          −
-                        </button>
-                        <span className="font-space-mono text-sm w-6 text-center">
-                          {item.quantity}
-                        </span>
-                        <button
-                          onClick={() =>
-                            updateQuantity(item._id, item.quantity + 1)
-                          }
-                          className="w-7 h-7 bg-white/5 hover:bg-white/10 rounded flex items-center justify-center transition-colors text-sm"
-                        >
-                          +
-                        </button>
-                      </div>
-
-                      {/* Total */}
-                      <div className="text-slate-400 text-sm font-space-mono w-20 text-right">
-                        €{(item.price * item.quantity).toFixed(2)}
+                      {/* Price */}
+                      <div className="text-slate-400 text-sm font-space-mono">
+                        €{item.price?.toFixed(2)}
                       </div>
 
                       {/* Remove */}

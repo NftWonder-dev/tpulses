@@ -12,13 +12,17 @@ function readStoredCart() {
   try {
     const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
     if (!Array.isArray(stored)) return [];
-    return stored.filter(
-      (item) =>
-        item &&
-        typeof item._id === 'string' &&
-        Number.isInteger(item.quantity) &&
-        item.quantity > 0
-    );
+    // Each product is a single digital download, so keep one of each.
+    // Older saved carts may hold a quantity field or repeated products.
+    const seen = new Set();
+    const cart = [];
+    for (const item of stored) {
+      if (!item || typeof item._id !== 'string' || seen.has(item._id)) continue;
+      seen.add(item._id);
+      const { quantity, ...product } = item;
+      cart.push(product);
+    }
+    return cart;
   } catch {
     // Storage blocked (private mode) or corrupted: start with an empty cart.
     return [];
@@ -60,39 +64,19 @@ export function CartProvider({ children }) {
     if (loaded) writeStoredCart(cart);
   }, [cart, loaded]);
 
+  // Returns false if the product was already in the cart (nothing changes).
   const addToCart = (product) => {
-    setCart((prevCart) => {
-      // Check if product already exists
-      const existingItem = prevCart.find(item => item._id === product._id);
-      
-      if (existingItem) {
-        // Increase quantity
-        return prevCart.map(item =>
-          item._id === product._id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      } else {
-        // Add new item
-        return [...prevCart, { ...product, quantity: 1 }];
-      }
-    });
+    if (cart.some(item => item._id === product._id)) return false;
+    setCart((prevCart) =>
+      prevCart.some(item => item._id === product._id)
+        ? prevCart
+        : [...prevCart, product]
+    );
+    return true;
   };
 
   const removeFromCart = (productId) => {
     setCart((prevCart) => prevCart.filter(item => item._id !== productId));
-  };
-
-  const updateQuantity = (productId, quantity) => {
-    if (quantity <= 0) {
-      removeFromCart(productId);
-      return;
-    }
-    setCart((prevCart) =>
-      prevCart.map(item =>
-        item._id === productId ? { ...item, quantity } : item
-      )
-    );
   };
 
   const clearCart = () => {
@@ -103,11 +87,11 @@ export function CartProvider({ children }) {
   };
 
   const getCartCount = () => {
-    return cart.reduce((total, item) => total + item.quantity, 0);
+    return cart.length;
   };
 
   const getCartTotal = () => {
-    return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+    return cart.reduce((total, item) => total + (item.price || 0), 0);
   };
 
   return (
@@ -117,7 +101,6 @@ export function CartProvider({ children }) {
         isCartLoaded: loaded,
         addToCart,
         removeFromCart,
-        updateQuantity,
         clearCart,
         getCartCount,
         getCartTotal,
