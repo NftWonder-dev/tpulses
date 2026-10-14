@@ -1,4 +1,4 @@
-import Link from "next/link";
+import FooterLink from "./FooterLink";
 import { Activity, Instagram, Youtube } from "lucide-react";
 
 export default function Footer() {
@@ -44,20 +44,13 @@ export default function Footer() {
           </h5>
           <ul className="text-slate-500 text-sm space-y-4">
             <li>
-              <Link
-                href="/collections"
-                className="hover:text-cyan-400 transition-colors"
-              >
-                All Collections
-              </Link>
+              <FooterLink href="/collections">All Collections</FooterLink>
             </li>
             <li>
-              <Link
-                href="/theory"
-                className="hover:text-cyan-400 transition-colors"
-              >
-                Theory
-              </Link>
+              <FooterLink href="/theory">Theory</FooterLink>
+            </li>
+            <li>
+              <FooterLink href="/about">About Us</FooterLink>
             </li>
           </ul>
         </div>
@@ -68,36 +61,16 @@ export default function Footer() {
           </h5>
           <ul className="text-slate-500 text-sm space-y-4">
             <li>
-              <Link
-                href="/faq"
-                className="hover:text-cyan-400 transition-colors"
-              >
-                FAQ
-              </Link>
+              <FooterLink href="/faq">FAQ</FooterLink>
             </li>
             <li>
-              <Link
-                href="/specifications"
-                className="hover:text-cyan-400 transition-colors"
-              >
-                IR Guide
-              </Link>
+              <FooterLink href="/specifications">IR Guide</FooterLink>
             </li>
             <li>
-              <Link
-                href="/privacy"
-                className="hover:text-cyan-400 transition-colors"
-              >
-                Privacy Policy
-              </Link>
+              <FooterLink href="/privacy">Privacy Policy</FooterLink>
             </li>
             <li>
-              <Link
-                href="/terms"
-                className="hover:text-cyan-400 transition-colors"
-              >
-                Terms &amp; Refunds
-              </Link>
+              <FooterLink href="/terms">Terms &amp; Refunds</FooterLink>
             </li>
           </ul>
         </div>
