@@ -2,7 +2,7 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { client } from "@/lib/sanity";
-import { saveOrder } from "@/lib/sanityWrite";
+import { saveOrder, writeClient } from "@/lib/sanityWrite";
 
 const WEBHOOK_SECRET = process.env.LEMONSQUEEZY_WEBHOOK_SECRET;
 
@@ -39,6 +39,7 @@ export async function POST(request) {
     const customerName = order.attributes.user_name || "Customer";
     const orderTotal = (order.attributes.total / 100).toFixed(2);
     const variantId = order.attributes.first_order_item?.variant_id;
+    const cartId = data.meta.custom_data?.cart_id;
     const customProductIds = data.meta.custom_data?.product_ids;
 
     console.log("✅ Order ID:", order.id);
@@ -46,13 +47,41 @@ export async function POST(request) {
     console.log("👤 Name:", customerName);
     console.log("💰 Total:", orderTotal);
     console.log("🔍 Variant ID:", variantId);
+    console.log("🛒 Cart ID:", cartId);
     console.log("🛒 Cart product IDs:", customProductIds);
 
     let products;
+    let pendingCartId;
 
-    if (customProductIds) {
-      // Cart checkout: the product list was set by /api/cart-checkout.
-      const ids = [...new Set(customProductIds.split(",").filter(Boolean))];
+    if (cartId || customProductIds) {
+      // Cart checkout: the product list was set by /api/cart-checkout,
+      // either in a pendingCart document (cart_id) or inline (product_ids).
+      let ids;
+
+      if (cartId) {
+        // Only accept our own private pendingCart documents, since this
+        // document is deleted once the order is saved.
+        const cart =
+          typeof cartId === "string" && cartId.startsWith("carts.")
+            ? await writeClient.fetch(
+                `*[_id == $id && _type == "pendingCart"][0] { _id, productIds }`,
+                { id: cartId },
+              )
+            : null;
+
+        if (!cart) {
+          console.error("❌ Pending cart not found in Sanity:", cartId);
+          return NextResponse.json(
+            { error: "Product not found" },
+            { status: 404 },
+          );
+        }
+
+        pendingCartId = cart._id;
+        ids = [...new Set((cart.productIds || []).filter(Boolean))];
+      } else {
+        ids = [...new Set(customProductIds.split(",").filter(Boolean))];
+      }
 
       console.log("📌 Querying Sanity for cart products...");
       products = await client.fetch(
@@ -162,6 +191,19 @@ export async function POST(request) {
         products,
       });
       console.log("💾 Order saved to Sanity");
+
+      if (pendingCartId) {
+        try {
+          await writeClient.delete(pendingCartId);
+          console.log("🗑️ Pending cart deleted:", pendingCartId);
+        } catch (deleteError) {
+          console.error(
+            "⚠️ Pending cart NOT deleted:",
+            pendingCartId,
+            deleteError.message,
+          );
+        }
+      }
     } catch (saveError) {
       console.error("⚠️ Order NOT saved to Sanity:", saveError.message);
     }

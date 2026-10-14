@@ -1,6 +1,8 @@
 // app/api/cart-checkout/route.js
 import { NextResponse } from "next/server";
+import crypto from "crypto";
 import { client } from "@/lib/sanity";
+import { writeClient } from "@/lib/sanityWrite";
 
 const LEMONSQUEEZY_API_KEY = process.env.LEMONSQUEEZY_API_KEY;
 const LEMONSQUEEZY_STORE_ID = process.env.LEMONSQUEEZY_STORE_ID;
@@ -67,6 +69,27 @@ export async function POST(request) {
       totalCents,
     );
 
+    // LemonSqueezy limits each custom field to 255 characters, too short for
+    // a list of product IDs. Save the cart in Sanity and send only its ID.
+    // The "carts." prefix keeps the document hidden from public queries.
+    let cartId;
+    try {
+      const cart = await writeClient.create({
+        _id: `carts.${crypto.randomUUID()}`,
+        _type: "pendingCart",
+        productIds: products.map((p) => p._id),
+        createdAt: new Date().toISOString(),
+      });
+      cartId = cart._id;
+    } catch (cartError) {
+      // Never take payment without a cart record to deliver from.
+      console.error("Failed to save pending cart:", cartError);
+      return NextResponse.json(
+        { error: "Failed to create checkout" },
+        { status: 500 },
+      );
+    }
+
     const requestBody = {
       data: {
         type: "checkouts",
@@ -80,7 +103,7 @@ export async function POST(request) {
             email: customerEmail || undefined,
             // Read back by the webhook to know which files to deliver.
             custom: {
-              product_ids: products.map((p) => p._id).join(","),
+              cart_id: cartId,
             },
           },
           custom_price: totalCents,
