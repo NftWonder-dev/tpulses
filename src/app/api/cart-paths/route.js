@@ -1,4 +1,4 @@
-// app/api/cart-paths/route.js - Collection › Category › Sub-Pack names for cart items
+// app/api/cart-paths/route.js - Collection › Category › Sub-Pack names and slug for cart items
 import { NextResponse } from "next/server";
 import { client } from "@/lib/sanity";
 
@@ -22,14 +22,15 @@ export async function POST(request) {
         _id,
         "collectionName": coalesce(collection->name, category->collection->name),
         "categoryName": category->name,
-        "subPackName": subpack->name
+        "subPackName": subpack->name,
+        "slug": slug.current
       }`,
       { ids: [...new Set(productIds)] },
     );
 
     const paths = {};
-    for (const { _id, collectionName, categoryName, subPackName } of products) {
-      paths[_id] = { collectionName, categoryName, subPackName };
+    for (const { _id, collectionName, categoryName, subPackName, slug } of products) {
+      paths[_id] = { collectionName, categoryName, subPackName, slug };
     }
 
     return NextResponse.json(paths);

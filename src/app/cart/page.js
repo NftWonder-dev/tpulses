@@ -130,9 +130,11 @@ export default function CartPage() {
         <div className="grid lg:grid-cols-3 gap-8 lg:gap-12">
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-3">
-            {cart.map((item) => (
-              <div key={item._id} className="glass-card p-4 md:p-6 rounded-xl">
-                <div className="flex gap-4 md:gap-6">
+            {cart.map((item) => {
+              // The slug comes from /api/cart-paths, since older carts don't store it.
+              const path = paths[item._id];
+              const details = (
+                <>
                   {/* Image */}
                   <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-lg overflow-hidden bg-gradient-to-br from-cyan-500/20 to-blue-500/20 flex-shrink-0">
                     {item.image ? (
@@ -149,17 +151,34 @@ export default function CartPage() {
                   </div>
 
                   {/* Details */}
-                  <div className="flex-1 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      {paths[item._id] && (
-                        <ProductPath product={paths[item._id]} />
-                      )}
-                      <h3 className="font-space-grotesk text-lg md:text-xl font-bold">
-                        {item.name}
-                      </h3>
-                    </div>
+                  <div className="flex-1 min-w-0">
+                    {path && <ProductPath product={path} />}
+                    <h3 className="font-space-grotesk text-lg md:text-xl font-bold transition-colors group-hover:text-cyan-400">
+                      {item.name}
+                    </h3>
+                  </div>
+                </>
+              );
 
-                    <div className="flex items-center gap-3 md:gap-4">
+              return (
+                <div key={item._id} className="glass-card p-4 md:p-6 rounded-xl">
+                  <div className="flex items-center gap-4 md:gap-6">
+                    {/* Image, path and name open the product page. The remove
+                        button stays outside the link. */}
+                    {path?.slug ? (
+                      <Link
+                        href={`/products/${path.slug}`}
+                        className="group flex-1 min-w-0 flex items-center gap-4 md:gap-6 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-4 focus-visible:ring-offset-deep-bg"
+                      >
+                        {details}
+                      </Link>
+                    ) : (
+                      <div className="flex-1 min-w-0 flex items-center gap-4 md:gap-6">
+                        {details}
+                      </div>
+                    )}
+
+                    <div className="flex flex-col items-end gap-3 md:flex-row md:items-center md:gap-4 flex-shrink-0">
                       {/* Price */}
                       <div className="text-slate-400 text-sm font-space-mono">
                         €{item.price?.toFixed(2)}
@@ -168,6 +187,7 @@ export default function CartPage() {
                       {/* Remove */}
                       <button
                         onClick={() => removeFromCart(item._id)}
+                        aria-label={`Remove ${item.name} from cart`}
                         className="text-slate-400 hover:text-red-400 transition-colors flex-shrink-0"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -175,8 +195,8 @@ export default function CartPage() {
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
 
             <button
               onClick={handleClearCart}
