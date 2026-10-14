@@ -50,7 +50,7 @@ export const team = [
     accent: "cyan",
     role: "CO-FOUNDER · CREATOR OF THE METHOD",
     shortBio:
-      "One of the most influential sound engineers in Portuguese music. Trained at Abbey Road in 1982, he has spent more than four decades behind the console — recording António Variações, Rui Veloso, GNR and Camané, and mixing more than 850 concerts for Madredeus and Dulce Pontes around the world. A lifelong researcher in acoustics, music and mathematics, he created the method behind every Trim Pulses impulse.",
+      "One of the most influential sound engineers in Portuguese music. Trained at Abbey Road in 1982, he has spent more than four decades behind the console — recording Madredeus, Dulce Pontes, António Variações, Rui Veloso, GNR and Camané, and mixing more than 3000 concerts around the world. A lifelong researcher in acoustics, music and mathematics, he created the method and softwarebehind every Trim Pulses impulse.",
     photo: {
       src: "/images/FotosBio/testA.png",
       alt: "António Pinheiro da Silva",
