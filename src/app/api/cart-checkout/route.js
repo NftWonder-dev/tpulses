@@ -19,7 +19,9 @@ export async function POST(request) {
     }
 
     // Each digital product is charged once, however many times it is in the cart.
-    const uniqueIds = [...new Set(productIds.filter((id) => typeof id === "string"))];
+    const uniqueIds = [
+      ...new Set(productIds.filter((id) => typeof id === "string")),
+    ];
 
     // Prices come from Sanity, never from the browser.
     const products = await client.fetch(

@@ -57,7 +57,14 @@ export async function getOrdersByEmail(email) {
       currency,
       testMode,
       customerName,
-      "products": products[]->{ _id, name, "slug": slug.current }
+      "products": products[]->{
+        _id,
+        name,
+        "slug": slug.current,
+        "collectionName": coalesce(collection->name, category->collection->name),
+        "categoryName": category->name,
+        "subPackName": subpack->name
+      }
     }`,
     { email },
   );
