@@ -50,7 +50,7 @@ export const team = [
     accent: "cyan",
     role: "CO-FOUNDER · CREATOR OF THE METHOD",
     shortBio:
-      "One of the most influential sound engineers in Portuguese music. Trained at Abbey Road in 1982, he has spent more than four decades behind the console — recording Madredeus, Dulce Pontes, António Variações, Rui Veloso, GNR and Camané, and mixing more than 3000 concerts around the world. A lifelong researcher in acoustics, music and mathematics, he created the method and softwarebehind every Trim Pulses impulse.",
+      "One of the most influential sound engineers in Portuguese music. Trained at Abbey Road in 1982, he has spent more than four decades behind the console — recording Madredeus, Dulce Pontes, António Variações, Rui Veloso, GNR and Camané, and mixing more than 3000 concerts around the world. A lifelong researcher in acoustics, music and mathematics, he created the method and software behind every Trim Pulses impulse.",
     photo: {
       src: "/images/FotosBio/testA.png",
       alt: "António Pinheiro da Silva",
@@ -156,7 +156,7 @@ export const team = [
       },
     ],
     credits:
-      "Madredeus, Dulce Pontes, António Variações, Rui Veloso, GNR, Camané, Sérgio Godinho, José Mário Branco, Carlos do Carmo, Jorge Palma, Fausto, Rodrigo Leão, Heróis do Mar, Sétima Legião, Trovante, Rádio Macau, UHF, Lena d'Água, Teresa Salgueiro, Danças Ocultas, Resistência, The Durutti Column and many others.",
+      "Madredeus, Dulce Pontes, José Mário Branco, Sérgio Godinho, Fausto, António Variações, Rui Veloso, GNR, Camané, Carlos do Carmo, Jorge Palma, Rodrigo Leão, Heróis do Mar, Sétima Legião, Trovante, Rádio Macau, UHF, Lena d'Água, Teresa Salgueiro, Danças Ocultas, Resistência, The Durutti Column and many others.",
   },
   {
     id: "paulo",
