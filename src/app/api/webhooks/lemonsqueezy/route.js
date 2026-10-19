@@ -26,7 +26,9 @@ async function sendSaleAlert({ order, customerEmail, customerName, products, cus
     const currency = attrs.currency || "EUR";
     const amount = currency === "EUR" ? `€${total}` : `${total} ${currency}`;
     const prefix = attrs.test_mode ? "[TEST] " : "";
-    const dashboardUrl = `https://app.lemonsqueezy.com/orders/${order.id}`;
+    const dashboardUrl = attrs.identifier
+      ? `https://app.lemonsqueezy.com/orders/${encodeURIComponent(attrs.identifier)}`
+      : null;
 
     const { error } = await resend.emails.send({
       from: "Trim Pulses <orders@trimpulses.com>",
@@ -36,7 +38,13 @@ async function sendSaleAlert({ order, customerEmail, customerName, products, cus
       html: `
         <h2>${prefix}New sale</h2>
         <p><strong>Order #:</strong> ${escapeHtml(attrs.order_number)} (LS id ${escapeHtml(order.id)})</p>
-        <p><strong>Date:</strong> ${escapeHtml(attrs.created_at)}</p>
+        <p><strong>Date:</strong> ${escapeHtml(
+          new Date(attrs.created_at).toLocaleString("en-GB", {
+            timeZone: "Europe/Lisbon",
+            dateStyle: "medium",
+            timeStyle: "short",
+          }),
+        )}</p>
         <p><strong>Customer:</strong> ${escapeHtml(customerName)} &lt;${escapeHtml(customerEmail)}&gt;</p>
         <p><strong>Total:</strong> ${escapeHtml(total)} ${escapeHtml(currency)}</p>
         <p><strong>Products:</strong></p>
@@ -47,7 +55,7 @@ async function sendSaleAlert({ order, customerEmail, customerName, products, cus
             : '<span style="color:#dc2626;font-weight:bold;">NO – customer did not get their download links</span>'
         }</p>
         <p><strong>Order saved to account:</strong> ${orderSaved ? "Yes" : "NO"}</p>
-        <p><a href="${dashboardUrl}">View order in LemonSqueezy</a></p>
+        ${dashboardUrl ? `<p><a href="${dashboardUrl}">View order in LemonSqueezy</a></p>` : ""}
       `,
     });
 
