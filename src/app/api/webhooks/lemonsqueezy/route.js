@@ -30,6 +30,40 @@ async function sendSaleAlert({ order, customerEmail, customerName, products, cus
       ? `https://app.lemonsqueezy.com/orders/${encodeURIComponent(attrs.identifier)}`
       : null;
 
+    // Product paths like on /account. If this lookup fails, fall back to names.
+    let details = {};
+    try {
+      const ids = products.map((p) => p._id).filter(Boolean);
+      const rows = await writeClient.fetch(
+        `*[_type == "product" && _id in $ids] {
+          _id,
+          name,
+          price,
+          "collectionName": coalesce(collection->name, category->collection->name),
+          "categoryName": category->name,
+          "subPackName": subpack->name
+        }`,
+        { ids },
+      );
+      details = Object.fromEntries(rows.map((r) => [r._id, r]));
+    } catch (lookupError) {
+      console.error("⚠️ Sale alert product lookup failed:", lookupError.message);
+    }
+
+    const productLines = products.map((p) => {
+      const d = p._id && details[p._id];
+      if (!d) return `<li>${escapeHtml(p.name)}</li>`;
+      const path = [d.collectionName, d.categoryName, d.subPackName]
+        .filter(Boolean)
+        .map(escapeHtml)
+        .join(" › ");
+      const price =
+        typeof d.price === "number" ? ` (€${escapeHtml(d.price.toFixed(2))})` : "";
+      return `<li>${
+        path ? `<span style="color:#64748b;font-size:13px;">${path}</span> — ` : ""
+      }${escapeHtml(d.name || p.name)}${price}</li>`;
+    });
+
     const { error } = await resend.emails.send({
       from: "Trim Pulses <orders@trimpulses.com>",
       to: ["sales@trimpulses.com"],
@@ -48,7 +82,7 @@ async function sendSaleAlert({ order, customerEmail, customerName, products, cus
         <p><strong>Customer:</strong> ${escapeHtml(customerName)} &lt;${escapeHtml(customerEmail)}&gt;</p>
         <p><strong>Total:</strong> ${escapeHtml(total)} ${escapeHtml(currency)}</p>
         <p><strong>Products:</strong></p>
-        <ul>${products.map((p) => `<li>${escapeHtml(p.name)}</li>`).join("")}</ul>
+        <ul>${productLines.join("")}</ul>
         <p><strong>Customer email sent:</strong> ${
           customerEmailSent
             ? "Yes"
