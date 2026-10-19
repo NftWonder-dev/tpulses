@@ -1,3 +1,5 @@
+import { CONTACT_EMAIL } from "@/lib/legal";
+
 export default function FAQPage() {
   return (
     <div className="min-h-screen pt-32 pb-20">
@@ -220,16 +222,13 @@ export default function FAQPage() {
           <h3 className="font-space-grotesk text-2xl font-bold mb-4">
             Still have questions?
           </h3>
-          <p className="text-slate-400 mb-6">
+          <p className="text-slate-400 mb-4">
             Feel free to reach out to us for more information about our impulse
-            responses.
+            responses. Write to us at:
           </p>
-          <a
-            href="/collections"
-            className="inline-block bg-cyan-500 hover:bg-cyan-400 text-black px-8 py-4 rounded-full font-bold uppercase text-sm transition-all"
-          >
-            Explore Collections
-          </a>
+          <p className="font-space-mono text-cyan-400 text-xl md:text-2xl select-all break-all">
+            {CONTACT_EMAIL}
+          </p>
         </div>
       </div>
     </div>
