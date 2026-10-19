@@ -164,7 +164,7 @@ export const team = [
     accent: "magenta",
     role: "CO-FOUNDER · SOUND ENGINEER",
     shortBio:
-      "Sound engineer and musician with 20 years of experience in the studio, on festival stages and in TV broadcast — from recordings with Sérgio Godinho and Diabo na Cruz to live broadcasts of Rock in Rio, NOS Alive and the UEFA Champions League. He is also the bassist, producer and technical director of the band Criatura. At Trim Pulses he works alongside António and built everything around them: the website, the visuals and the video.",
+      "Sound engineer and musician with 20 years of experience in the studio, on festival stages and in TV broadcast — from recordings with Sérgio Godinho and Diabo na Cruz to live broadcasts of Rock in Rio, NOS Alive and the UEFA Champions League. He is also the bassist, producer and technical director of the band Criatura. At Trim Pulses he works alongside António and built everything around the project: the website, the visuals and the video.",
     photo: {
       src: "/images/FotosBio/testB.png",
       alt: "Paulo Lourenço",
