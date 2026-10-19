@@ -76,10 +76,7 @@ export default function Navigation() {
           >
             Specifications
           </Link>
-          <Link
-            href="/about"
-            className="hover:text-cyan-400 transition-colors"
-          >
+          <Link href="/about" className="hover:text-cyan-400 transition-colors">
             About
           </Link>
         </div>
