@@ -61,7 +61,7 @@ export default function VideoButton() {
             <iframe
               width="100%"
               height="100%"
-              src="https://www.youtube.com/embed/i0rWx4WVdzU?autoplay=1"
+              src="https://www.youtube-nocookie.com/embed/i0rWx4WVdzU?autoplay=1"
               title="Trim Pulses Explainer"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen

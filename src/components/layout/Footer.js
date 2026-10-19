@@ -72,6 +72,9 @@ export default function Footer() {
             <li>
               <FooterLink href="/terms">Terms &amp; Refunds</FooterLink>
             </li>
+            <li>
+              <FooterLink href="/cookies">Cookie Policy</FooterLink>
+            </li>
           </ul>
         </div>
       </div>

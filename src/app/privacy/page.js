@@ -1,3 +1,4 @@
+import Link from "next/link";
 import LegalLayout from "@/components/legal/LegalLayout";
 import { BUSINESS_NAME, BUSINESS_LOCATION, CONTACT_EMAIL } from "@/lib/legal";
 
@@ -127,14 +128,19 @@ const sections = [
     content: (
       <>
         <p>
-          We use a single cookie, and only when you log in to your account: a
-          secure login cookie that keeps you signed in for up to 30 days. It is
-          strictly necessary for the account to work, so it does not require
-          consent. We do not use advertising or tracking cookies.
+          Customers only get one cookie, and only when they log in to their
+          account: tp_session, a secure login cookie that keeps you signed in
+          for up to 30 days. It is strictly necessary for the account to work,
+          so it does not require consent. A second cookie, tp_admin_auth, is
+          used only for the site administrator. We do not use advertising or
+          tracking cookies.
         </p>
         <p>
           The checkout page is provided by Lemon Squeezy, which may set its own
           cookies as described in its privacy policy.
+        </p>
+        <p>
+          See our <Link href="/cookies">Cookie Policy</Link> for details.
         </p>
       </>
     ),

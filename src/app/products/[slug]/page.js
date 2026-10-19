@@ -167,7 +167,7 @@ export default async function ProductPage({ params }) {
                 <iframe
                   width="100%"
                   height="100%"
-                  src={`https://www.youtube.com/embed/${product.youtubeVideoId}`}
+                  src={`https://www.youtube-nocookie.com/embed/${product.youtubeVideoId}`}
                   title={product.name}
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
