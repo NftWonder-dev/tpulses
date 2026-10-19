@@ -76,6 +76,12 @@ export default function Navigation() {
           >
             Specifications
           </Link>
+          <Link
+            href="/about"
+            className="hover:text-cyan-400 transition-colors"
+          >
+            About
+          </Link>
         </div>
 
         {/* Desktop Right Side */}
@@ -165,6 +171,13 @@ export default function Navigation() {
               onClick={() => setMobileMenuOpen(false)}
             >
               Specifications
+            </Link>
+            <Link
+              href="/about"
+              className="block font-space-mono text-sm uppercase tracking-widest text-slate-400 hover:text-cyan-400 transition-colors py-2"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              About
             </Link>
             <button
               onClick={() => {
