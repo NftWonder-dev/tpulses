@@ -3,8 +3,63 @@ import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { client } from "@/lib/sanity";
 import { saveOrder, writeClient } from "@/lib/sanityWrite";
+import { Resend } from "resend";
 
 const WEBHOOK_SECRET = process.env.LEMONSQUEEZY_WEBHOOK_SECRET;
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+// Internal "new sale" email to sales@. Never throws: a failed alert must not
+// affect the customer email, the order save or the webhook response.
+async function sendSaleAlert({ order, customerEmail, customerName, products, customerEmailSent, orderSaved }) {
+  try {
+    const attrs = order.attributes;
+    const total = (attrs.total / 100).toFixed(2);
+    const currency = attrs.currency || "EUR";
+    const amount = currency === "EUR" ? `€${total}` : `${total} ${currency}`;
+    const prefix = attrs.test_mode ? "[TEST] " : "";
+    const dashboardUrl = `https://app.lemonsqueezy.com/orders/${order.id}`;
+
+    const { error } = await resend.emails.send({
+      from: "Trim Pulses <orders@trimpulses.com>",
+      to: ["sales@trimpulses.com"],
+      replyTo: customerEmail,
+      subject: `${prefix}New sale: ${amount} – ${customerEmail}`,
+      html: `
+        <h2>${prefix}New sale</h2>
+        <p><strong>Order #:</strong> ${escapeHtml(attrs.order_number)} (LS id ${escapeHtml(order.id)})</p>
+        <p><strong>Date:</strong> ${escapeHtml(attrs.created_at)}</p>
+        <p><strong>Customer:</strong> ${escapeHtml(customerName)} &lt;${escapeHtml(customerEmail)}&gt;</p>
+        <p><strong>Total:</strong> ${escapeHtml(total)} ${escapeHtml(currency)}</p>
+        <p><strong>Products:</strong></p>
+        <ul>${products.map((p) => `<li>${escapeHtml(p.name)}</li>`).join("")}</ul>
+        <p><strong>Customer email sent:</strong> ${
+          customerEmailSent
+            ? "Yes"
+            : '<span style="color:#dc2626;font-weight:bold;">NO – customer did not get their download links</span>'
+        }</p>
+        <p><strong>Order saved to account:</strong> ${orderSaved ? "Yes" : "NO"}</p>
+        <p><a href="${dashboardUrl}">View order in LemonSqueezy</a></p>
+      `,
+    });
+
+    if (error) {
+      console.error("⚠️ Sale alert NOT sent:", error.message || error);
+    } else {
+      console.log("📣 Sale alert sent to sales@");
+    }
+  } catch (alertError) {
+    console.error("⚠️ Sale alert NOT sent:", alertError.message);
+  }
+}
 
 function verifyWebhookSignature(payload, signature) {
   const hash = crypto
@@ -152,33 +207,51 @@ export async function POST(request) {
     );
 
     console.log("📤 Sending email...");
-    const emailResponse = await fetch(
-      "https://www.trimpulses.com/api/send-email",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-internal-secret": WEBHOOK_SECRET,
+    // A failed customer email no longer stops here: we still save the order
+    // and alert sales@ once, then answer 500 below so LemonSqueezy retries.
+    let customerEmailSent = false;
+    try {
+      const emailResponse = await fetch(
+        "https://www.trimpulses.com/api/send-email",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-internal-secret": WEBHOOK_SECRET,
+          },
+          body: JSON.stringify({
+            customerEmail,
+            customerName,
+            products: products.map((p) => ({
+              name: p.name,
+              fileKey: p.fileUrl,
+            })),
+            orderTotal,
+          }),
         },
-        body: JSON.stringify({
-          customerEmail,
-          customerName,
-          products: products.map((p) => ({
-            name: p.name,
-            fileKey: p.fileUrl,
-          })),
-          orderTotal,
-        }),
-      },
-    );
+      );
 
-    if (!emailResponse.ok) {
-      const errorText = await emailResponse.text();
-      console.error("❌ Email failed:", emailResponse.status, errorText);
-      throw new Error("Failed to send email");
+      if (!emailResponse.ok) {
+        const errorText = await emailResponse.text();
+        console.error("❌ Email failed:", emailResponse.status, errorText);
+      } else {
+        customerEmailSent = true;
+        console.log("✅ Email sent successfully");
+      }
+    } catch (emailError) {
+      console.error("❌ Email failed:", emailError.message);
     }
 
-    console.log("✅ Email sent successfully");
+    // Only alert sales@ the first time we see this order (not on retries).
+    let isNewOrder = false;
+    let orderSaved = false;
+    try {
+      isNewOrder = !(await writeClient.fetch(`defined(*[_id == $id][0]._id)`, {
+        id: `orders.ls-${order.id}`,
+      }));
+    } catch (checkError) {
+      console.error("⚠️ Could not check for existing order:", checkError.message);
+    }
 
     // NEW: save the order for the customer account.
     // Wrapped in its own try/catch: if this fails, the customer already has
@@ -190,9 +263,11 @@ export async function POST(request) {
         customerName,
         products,
       });
+      orderSaved = true;
       console.log("💾 Order saved to Sanity");
 
-      if (pendingCartId) {
+      // Keep the cart if the email failed: the retry needs it to resend links.
+      if (pendingCartId && customerEmailSent) {
         try {
           await writeClient.delete(pendingCartId);
           console.log("🗑️ Pending cart deleted:", pendingCartId);
@@ -206,6 +281,25 @@ export async function POST(request) {
       }
     } catch (saveError) {
       console.error("⚠️ Order NOT saved to Sanity:", saveError.message);
+    }
+
+    if (isNewOrder) {
+      await sendSaleAlert({
+        order,
+        customerEmail,
+        customerName,
+        products,
+        customerEmailSent,
+        orderSaved,
+      });
+    }
+
+    if (!customerEmailSent) {
+      // Same response as before, so LemonSqueezy retries the customer email.
+      return NextResponse.json(
+        { error: "Failed to send email" },
+        { status: 500 },
+      );
     }
 
     return NextResponse.json({ success: true });

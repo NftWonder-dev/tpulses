@@ -34,6 +34,7 @@ export async function POST(request) {
     const { error } = await resend.emails.send({
       from: "Trim Pulses <account@trimpulses.com>",
       to: [cleanEmail],
+      replyTo: "support@trimpulses.com",
       subject: "Your Trim Pulses login link",
       html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 520px; margin: 0 auto; padding: 32px 20px; color: #1e293b;">

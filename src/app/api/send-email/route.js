@@ -200,6 +200,7 @@ export async function POST(request) {
     const { data, error } = await resend.emails.send({
       from: "Trim Pulses <orders@trimpulses.com>",
       to: [customerEmail],
+      replyTo: "support@trimpulses.com",
       subject: `Your Purchase: ${products.length} ${products.length === 1 ? "Product" : "Products"} - Download Ready!`,
       html: htmlContent,
     });
