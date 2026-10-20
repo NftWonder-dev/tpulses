@@ -181,7 +181,7 @@ export const team = [
         years: "2019 – present",
         title: "TV audio — SIC, RTP, CMTV",
         description:
-          "Recording, audio post-production and broadcast sound for live and recorded entertainment shows — including Taskmaster (RTP) — award ceremonies such as the Globos de Ouro, football from the Portuguese league to the UEFA Champions League, podcasts and advertising, plus festival broadcasts from Rock in Rio, NOS Alive, Paredes de Coura, Vilar de Mouros and MEO Kalorama",
+          "Recording, audio post-production and broadcast sound for live and recorded entertainment shows — including Taskmaster (RTP) — award ceremonies such as the Globos de Ouro (SIC), football from the Portuguese league to the UEFA Champions League, podcasts and advertising, plus festival broadcasts from Rock in Rio, NOS Alive, Paredes de Coura, Vilar de Mouros and MEO Kalorama",
       },
       {
         years: "2017 – 2019",
@@ -205,7 +205,7 @@ export const team = [
         years: "1998 – present",
         title: "Musician",
         description:
-          "Bass with Os Compotas, Los Negros, Trashcan and My Kicks in 66; trombone with Sabrosas Funk and Capela Jazz Quartet",
+          "Bass with Criatura, Os Compotas, Los Negros, Trashcan and My Kicks in 66; trombone with Sabrosas Funk and Capela Jazz Quartet",
       },
       {
         years: "2014 – 2016",
